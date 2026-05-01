@@ -20,11 +20,16 @@
     --transition: all 0.3s ease;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     line-height: 1.6;
     color: var(--dark);
     background: var(--white);
+    overflow-x: hidden;
 }
 
 .container {
@@ -409,6 +414,162 @@ body {
     font-size: 0.9rem;
 }
 
+/* === IMPROVED LOANS SECTION === */
+.loans {
+    padding: 5rem 0;
+    background: var(--light);
+}
+
+.bank-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.bank-card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    text-align: center;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.bank-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary);
+}
+
+.bank-logo {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    letter-spacing: 2px;
+}
+
+.bank-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+    color: var(--dark);
+}
+
+.bank-card > p {
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    font-size: 0.95rem;
+}
+
+.bank-card ul {
+    list-style: none;
+    margin-top: 1rem;
+    text-align: left;
+}
+
+.bank-card ul li {
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--gray);
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.bank-card ul li:before {
+    content: "✓";
+    color: var(--success);
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+}
+
+.loan-cta {
+    text-align: center;
+    margin-top: 3rem;
+    padding: 2.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    color: var(--white);
+}
+
+.loan-cta p {
+    margin-bottom: 1.25rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.loan-cta .btn-primary {
+    background: var(--white);
+    color: var(--primary);
+}
+
+.loan-cta .btn-primary:hover {
+    background: var(--secondary);
+    color: var(--dark);
+}
+
+/* === AREAS WE SERVE - IMPROVED === */
+.locations {
+    padding: 5rem 0;
+    background: var(--white);
+}
+
+.location-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.location-card {
+    background: var(--white);
+    padding: 2rem 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    border: 1px solid #eee;
+    text-align: center;
+}
+
+.location-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary);
+}
+
+.location-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.location-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--primary);
+}
+
+.location-card p {
+    color: var(--gray);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.property-count {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.25rem 1rem;
+    background: rgba(37, 211, 102, 0.1);
+    color: var(--success);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-radius: 20px;
+}
+
 /* === TESTIMONIALS SECTION === */
 .testimonials {
     padding: 5rem 0;
@@ -565,6 +726,9 @@ body {
     background: var(--dark);
     color: var(--white);
     padding: 4rem 0 2rem;
+    margin-top: 0;
+    position: relative;
+    clear: both;
 }
 
 .footer-grid {
@@ -726,6 +890,14 @@ body {
     .filters {
         flex-direction: column;
     }
+    
+    .bank-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .location-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 480px) {
@@ -740,159 +912,4 @@ body {
     .stat-number {
         font-size: 1.5rem;
     }
-}
-/* === IMPROVED LOANS SECTION === */
-.loans {
-    padding: 5rem 0;
-    background: var(--light);
-}
-
-.bank-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
-    margin-top: 3rem;
-}
-
-.bank-card {
-    background: var(--white);
-    padding: 2rem;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    transition: var(--transition);
-    text-align: center;
-    border: 1px solid rgba(0,0,0,0.05);
-}
-
-.bank-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--primary);
-}
-
-.bank-logo {
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: var(--primary);
-    margin-bottom: 1rem;
-    letter-spacing: 2px;
-}
-
-.bank-card h3 {
-    font-size: 1.4rem;
-    margin-bottom: 0.75rem;
-    color: var(--dark);
-}
-
-.bank-card > p {
-    color: var(--primary);
-    font-weight: 600;
-    margin-bottom: 1.25rem;
-    font-size: 0.95rem;
-}
-
-.bank-card ul {
-    list-style: none;
-    margin-top: 1rem;
-    text-align: left;
-}
-
-.bank-card ul li {
-    padding: 0.5rem 0;
-    font-size: 0.9rem;
-    color: var(--gray);
-    position: relative;
-    padding-left: 1.5rem;
-}
-
-.bank-card ul li:before {
-    content: "✓";
-    color: var(--success);
-    position: absolute;
-    left: 0;
-    font-weight: bold;
-}
-
-.loan-cta {
-    text-align: center;
-    margin-top: 3rem;
-    padding: 2.5rem;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-lg);
-    color: var(--white);
-}
-
-.loan-cta p {
-    margin-bottom: 1.25rem;
-    font-size: 1.2rem;
-    font-weight: 500;
-}
-
-.loan-cta .btn-primary {
-    background: var(--white);
-    color: var(--primary);
-}
-
-.loan-cta .btn-primary:hover {
-    background: var(--secondary);
-    color: var(--dark);
-}
-
-/* === AREAS WE SERVE - IMPROVED === */
-.locations {
-    padding: 5rem 0;
-    background: var(--white);
-}
-
-.location-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    margin-top: 3rem;
-}
-
-.location-card {
-    background: var(--white);
-    padding: 2rem 1.5rem;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    transition: var(--transition);
-    border: 1px solid #eee;
-    text-align: center;
-}
-
-.location-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--primary);
-}
-
-.location-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-}
-
-.location-card h3 {
-    font-size: 1.5rem;
-    margin-bottom: 0.75rem;
-    color: var(--primary);
-}
-
-.location-card p {
-    color: var(--gray);
-    line-height: 1.5;
-    margin-bottom: 1rem;
-    font-size: 0.95rem;
-}
-
-.property-count {
-    display: inline-block;
-    margin-top: 0.5rem;
-    padding: 0.25rem 1rem;
-    background: rgba(37, 211, 102, 0.1);
-    color: var(--success);
-    font-weight: 600;
-    font-size: 0.85rem;
-    border-radius: 20px;
 }
