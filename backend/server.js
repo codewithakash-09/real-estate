@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 
@@ -14,14 +16,22 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(express.static(path.join(__dirname, '../frontend')));
+
+// ===== FIXED: Serve frontend files for Render =====
+// This works both locally and on Render
+const frontendPath = path.join(__dirname, '../frontend');
+console.log('Serving frontend from:', frontendPath);
+app.use(express.static(frontendPath));
+
 // ============= MONGODB CONNECTION =============
-// Use your MongoDB Atlas connection string
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/realestate?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+    console.error('❌ MONGODB_URI is not defined in environment variables!');
+    console.log('Please set MONGODB_URI in Render Environment Variables');
+}
 
 mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
 })
@@ -34,8 +44,7 @@ mongoose.connect(MONGODB_URI, {
     console.log('⚠️  Continuing with in-memory fallback...');
 });
 
-// ============= IMPORT MODELS =============
-// Define schemas directly (since your model files might have path issues)
+// ============= SCHEMAS =============
 const propertySchema = new mongoose.Schema({
     title: { type: String, required: true },
     price: { type: Number, required: true },
@@ -60,7 +69,6 @@ const leadSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-// Create models (only if MongoDB is connected)
 let Property, Lead;
 if (mongoose.connection.readyState === 1) {
     Property = mongoose.model('Property', propertySchema);
@@ -152,9 +160,6 @@ let properties = [
 let leads = [];
 
 // ============= AUTH MIDDLEWARE =============
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-
 const authMiddleware = (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     
@@ -173,12 +178,10 @@ const authMiddleware = (req, res, next) => {
 
 // ============= PROPERTY ROUTES =============
 
-// GET all properties
 app.get('/api/properties', async (req, res) => {
     try {
         const { location, type, minPrice, maxPrice } = req.query;
         
-        // Try MongoDB first
         if (Property && mongoose.connection.readyState === 1) {
             let filter = {};
             if (location && location !== '') filter.location = location;
@@ -192,7 +195,6 @@ app.get('/api/properties', async (req, res) => {
             return res.json(data);
         }
         
-        // Fallback to in-memory
         let filtered = [...properties];
         if (location && location !== '') filtered = filtered.filter(p => p.location === location);
         if (type && type !== '') filtered = filtered.filter(p => p.type === type);
@@ -204,7 +206,6 @@ app.get('/api/properties', async (req, res) => {
     }
 });
 
-// GET single property
 app.get('/api/properties/:id', async (req, res) => {
     try {
         if (Property && mongoose.connection.readyState === 1) {
@@ -221,7 +222,6 @@ app.get('/api/properties/:id', async (req, res) => {
     }
 });
 
-// POST create property
 app.post('/api/properties', authMiddleware, async (req, res) => {
     try {
         if (Property && mongoose.connection.readyState === 1) {
@@ -242,7 +242,6 @@ app.post('/api/properties', authMiddleware, async (req, res) => {
     }
 });
 
-// PUT update property
 app.put('/api/properties/:id', authMiddleware, async (req, res) => {
     try {
         if (Property && mongoose.connection.readyState === 1) {
@@ -260,7 +259,6 @@ app.put('/api/properties/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// DELETE property
 app.delete('/api/properties/:id', authMiddleware, async (req, res) => {
     try {
         if (Property && mongoose.connection.readyState === 1) {
@@ -280,7 +278,6 @@ app.delete('/api/properties/:id', authMiddleware, async (req, res) => {
 
 // ============= LEAD ROUTES =============
 
-// POST create lead
 app.post('/api/leads', async (req, res) => {
     try {
         const { name, phone, message } = req.body;
@@ -314,7 +311,6 @@ app.post('/api/leads', async (req, res) => {
     }
 });
 
-// GET all leads
 app.get('/api/leads', authMiddleware, async (req, res) => {
     try {
         if (Lead && mongoose.connection.readyState === 1) {
@@ -329,7 +325,6 @@ app.get('/api/leads', authMiddleware, async (req, res) => {
     }
 });
 
-// PUT update lead
 app.put('/api/leads/:id', authMiddleware, async (req, res) => {
     try {
         const { status, notes } = req.body;
@@ -352,13 +347,13 @@ app.put('/api/leads/:id', authMiddleware, async (req, res) => {
 
 // ============= AUTH ROUTES =============
 
-const ADMIN_PASSWORD_HASH = bcrypt.hashSync(process.env.ADMIN_PASSWORD, 10);
+const ADMIN_PASSWORD_HASH = bcrypt.hashSync('akash@1234', 10);
 
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         
-        if (username !== process.env.ADMIN_USERNAME) {
+        if (username !== 'bittu') {
             return res.status(401).json({ message: 'Invalid username or password' });
         }
         
@@ -379,7 +374,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-// Health check endpoint
+// Health check
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
@@ -388,6 +383,11 @@ app.get('/api/health', (req, res) => {
         propertiesCount: properties.length,
         leadsCount: leads.length
     });
+});
+
+// Catch-all route for frontend (must be last)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 // ============= START SERVER =============
@@ -410,7 +410,6 @@ app.listen(PORT, '0.0.0.0', () => {
         console.log(`📁 Database: ${mongoose.connection.name}`);
     } else {
         console.log('💾 Using In-Memory Database ⚠️');
-        console.log('   Data will reset when server restarts');
     }
     console.log('=================================');
 });
