@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Bittu Khari Real Estate</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="login-screen">
+            <div class="login-box">
+                <h1>Admin Login</h1>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <input type="text" id="username" placeholder="Username" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="password" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </form>
+                <div id="loginError" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- Dashboard Screen -->
+        <div id="dashboardScreen" class="dashboard-screen" style="display: none;">
+            <!-- Sidebar -->
+            <nav class="sidebar">
+                <div class="sidebar-brand">
+                    <h2>BK Real Estate</h2>
+                    <p>Admin Panel</p>
+                </div>
+                <ul class="sidebar-menu">
+                    <li><a href="#" onclick="showSection('properties')" class="active">Properties</a></li>
+                    <li><a href="#" onclick="showSection('leads')">Leads</a></li>
+                    <li><a href="#" onclick="showSection('addProperty')">Add Property</a></li>
+                    <li><a href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Properties Section -->
+                <div id="propertiesSection" class="content-section">
+                    <div class="section-header">
+                        <h2>Property Listings</h2>
+                        <button class="btn btn-primary" onclick="showSection('addProperty')">+ Add New Property</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Price</th>
+                                    <th>Location</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="propertiesTableBody">
+                                <!-- Properties loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Leads Section -->
+                <div id="leadsSection" class="content-section" style="display: none;">
+                    <div class="section-header">
+                        <h2>Lead Management</h2>
+                        <div class="lead-stats">
+                            <span>Total: <strong id="totalLeads">0</strong></span>
+                            <span>Pending: <strong id="pendingLeads">0</strong></span>
+                            <span>Contacted: <strong id="contactedLeads">0</strong></span>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Message</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leadsTableBody">
+                                <!-- Leads loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Add/Edit Property Section -->
+                <div id="addPropertySection" class="content-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 id="formTitle">Add New Property</h2>
+                    </div>
+                    <form id="propertyForm" class="property-form">
+                        <input type="hidden" id="propertyId">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Title</label>
+                                <input type="text" id="title" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Price (₹)</label>
+                                <input type="number" id="price" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Location</label>
+                                <select id="location" required>
+                                    <option value="">Select Location</option>
+                                    <option value="Ghaziabad">Ghaziabad</option>
+                                    <option value="Dadri">Dadri</option>
+                                    <option value="Loni">Loni</option>
+                                    <option value="Hapur">Hapur</option>
+                                    <option value="Delhi">Delhi</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select id="type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="GDA Flat">GDA Flat</option>
+                                    <option value="Builder Flat">Builder Flat</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Bedrooms</label>
+                                <input type="number" id="bedrooms" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Bathrooms</label>
+                                <input type="number" id="bathrooms" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Area (sq.ft)</label>
+                                <input type="number" id="area" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="description" rows="4" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="status">
+                                <option value="Available">Available</option>
+                                <option value="Sold">Sold</option>
+                                <option value="Under Process">Under Process</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">Save Property</button>
+                            <button type="button" class="btn btn-secondary" onclick="showSection('properties')">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

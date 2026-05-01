@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bittu Khari Real Estate - Premium Properties in Ghaziabad</title>
+    <meta name="description" content="Find your dream property in Ghaziabad, Dadri, Loni, Hapur & Delhi. GDA flats, builder flats, buy/sell consultation by Bittu Khari. Call 9899130707">
+    
+    <!-- Open Graph tags -->
+    <meta property="og:title" content="Bittu Khari Real Estate - Premium Properties in Ghaziabad">
+    <meta property="og:description" content="Expert property consultation for GDA flats, builder flats in Ghaziabad & nearby areas.">
+    <meta property="og:type" content="website">
+    
+    <!-- Schema markup -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "Bittu Khari Real Estate",
+        "image": "/images/office.jpg",
+        "telephone": "+919899130707",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "F-163, Sector 11, Pratap Vihar",
+            "addressLocality": "Ghaziabad",
+            "postalCode": "201009",
+            "addressCountry": "IN"
+        }
+    }
+    </script>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <!-- Sticky Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="#" class="logo">
+                <span class="logo-text">Bittu Property</span>
+                <span class="logo-subtitle">Real Estate</span>
+            </a>
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#properties">Properties</a>
+                <a href="#loans">Loan Assistance</a>
+                <a href="#locations">Locations</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <div class="nav-cta">
+                <a href="tel:9899130707" class="btn btn-call">📞 Call Now</a>
+            </div>
+            <button class="mobile-menu-btn">☰</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">Find Your Dream Property in Ghaziabad & Nearby Areas</h1>
+            <p class="hero-subtitle">Expert consultation for GDA Flats, Builder Flats & Property Deals</p>
+            <div class="hero-cta">
+                <a href="tel:9899130707" class="btn btn-primary pulse">📞 Call Now - 9899130707</a>
+                <a href="https://wa.me/919899130707?text=Hi%20Bittu%20Ji%2C%20I'm%20interested%20in%20properties%20in%20%5Blocation%5D.%20Please%20share%20details." 
+                   class="btn btn-success" target="_blank">💬 WhatsApp Now</a>
+            </div>
+            <div class="trust-badges">
+                <div class="badge">✓ 10+ Years Experience</div>
+                <div class="badge">✓ 500+ Deals Closed</div>
+                <div class="badge">✓ Trusted by 1000+ Families</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <h2 class="section-title">Meet Bittu Khari - Your Trusted Property Consultant</h2>
+            <div class="about-grid">
+                <div class="about-image">
+                    <div class="image-placeholder">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='500'%3E%3Crect fill='%23003d4d' width='400' height='500'/%3E%3Ctext fill='white' font-size='20' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EBittu Khari%3C/text%3E%3C/svg%3E" 
+                             alt="Bittu Khari - Property Expert">
+                    </div>
+                </div>
+                <div class="about-content">
+                    <h3>10+ Years of Real Estate Excellence in Ghaziabad</h3>
+                    <p>With over a decade of experience in the real estate market, Bittu Khari has helped more than 500 families find their dream homes. Specializing in GDA flats, builder apartments, and property consultation across Ghaziabad, Dadri, Loni, Hapur, and Delhi.</p>
+                    <ul class="about-features">
+                        <li>✓ Extensive knowledge of GDA and private builder projects</li>
+                        <li>✓ Complete legal and documentation support</li>
+                        <li>✓ Best price negotiation for buyers and sellers</li>
+                        <li>✓ Hassle-free loan assistance with top banks</li>
+                        <li>✓ End-to-end property transfer support</li>
+                    </ul>
+                    <div class="about-stats">
+                        <div class="stat">
+                            <span class="stat-number">10+</span>
+                            <span class="stat-label">Years Experience</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">500+</span>
+                            <span class="stat-label">Deals Closed</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">1000+</span>
+                            <span class="stat-label">Happy Families</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Property Listings Section -->
+    <section class="properties" id="properties">
+        <div class="container">
+            <h2 class="section-title">Featured Properties</h2>
+            <div class="filter-section">
+                <div class="filters">
+                    <select id="locationFilter" class="filter-select">
+                        <option value="">All Locations</option>
+                        <option value="Ghaziabad">Ghaziabad</option>
+                        <option value="Dadri">Dadri</option>
+                        <option value="Loni">Loni</option>
+                        <option value="Hapur">Hapur</option>
+                        <option value="Delhi">Delhi</option>
+                    </select>
+                    <select id="typeFilter" class="filter-select">
+                        <option value="">All Types</option>
+                        <option value="GDA Flat">GDA Flat</option>
+                        <option value="Builder Flat">Builder Flat</option>
+                    </select>
+                    <select id="priceFilter" class="filter-select">
+                        <option value="">All Prices</option>
+                        <option value="0-2000000">Under ₹20 Lakhs</option>
+                        <option value="2000000-5000000">₹20-50 Lakhs</option>
+                        <option value="5000000-10000000">₹50 Lakhs - 1 Crore</option>
+                        <option value="10000000-999999999">Above 1 Crore</option>
+                    </select>
+                    <button class="btn btn-filter" onclick="filterProperties()">Apply Filters</button>
+                </div>
+            </div>
+            <div class="property-grid" id="propertyGrid">
+                <!-- Properties loaded dynamically from API -->
+            </div>
+            <div class="loading-spinner" id="loadingSpinner" style="display: none;">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Loan Assistance Section -->
+    <section class="loans" id="loans">
+        <div class="container">
+            <h2 class="section-title">Home Loan Assistance</h2>
+            <p class="section-subtitle">Get the best home loan deals from our trusted banking partners</p>
+            <div class="bank-grid">
+                <div class="bank-card">
+                    <div class="bank-logo">HDFC</div>
+                    <h3>HDFC Bank</h3>
+                    <p>Lowest interest rates starting from 8.50%</p>
+                    <ul>
+                        <li>Quick disbursement</li>
+                        <li>Flexible tenure up to 30 years</li>
+                        <li>Minimal documentation</li>
+                    </ul>
+                </div>
+                <div class="bank-card">
+                    <div class="bank-logo">ICICI</div>
+                    <h3>ICICI Bank</h3>
+                    <p>Special rates for women applicants from 8.45%</p>
+                    <ul>
+                        <li>Online application process</li>
+                        <li>Balance transfer facility</li>
+                        <li>Pre-approved loans</li>
+                    </ul>
+                </div>
+                <div class="bank-card">
+                    <div class="bank-logo">PIRAMAL</div>
+                    <h3>Piramal Housing Finance</h3>
+                    <p>Customized home loan solutions</p>
+                    <ul>
+                        <li>Loans up to ₹5 Crores</li>
+                        <li>Competitive interest rates</li>
+                        <li>Quick processing</li>
+                    </ul>
+                </div>
+                <div class="bank-card">
+                    <div class="bank-logo">INDIAN</div>
+                    <h3>Indian Bank</h3>
+                    <p>Government-backed affordable housing</p>
+                    <ul>
+                        <li>PM Awas Yojana benefits</li>
+                        <li>Low processing fees</li>
+                        <li>Special rural housing schemes</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="loan-cta">
+                <p>Need help with home loan? Contact us for free consultation</p>
+                <a href="tel:9899130707" class="btn btn-primary">Get Loan Assistance</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Locations Section -->
+    <section class="locations" id="locations">
+        <div class="container">
+            <h2 class="section-title">Areas We Serve</h2>
+            <div class="location-grid">
+                <div class="location-card">
+                    <div class="location-icon">🏙️</div>
+                    <h3>Ghaziabad</h3>
+                    <p>GDA flats, builder apartments, ready-to-move properties in Indirapuram, Vaishali, Vasundhara</p>
+                    <span class="property-count">50+ Properties Available</span>
+                </div>
+                <div class="location-card">
+                    <div class="location-icon">🏘️</div>
+                    <h3>Dadri</h3>
+                    <p>Affordable residential plots, builder floors near Greater Noida</p>
+                    <span class="property-count">25+ Properties Available</span>
+                </div>
+                <div class="location-card">
+                    <div class="location-icon">🏠</div>
+                    <h3>Loni</h3>
+                    <p>Budget-friendly apartments, independent houses, residential plots</p>
+                    <span class="property-count">30+ Properties Available</span>
+                </div>
+                <div class="location-card">
+                    <div class="location-icon">🌆</div>
+                    <h3>Hapur</h3>
+                    <p>Growing locality with affordable housing options, NH-24 connectivity</p>
+                    <span class="property-count">20+ Properties Available</span>
+                </div>
+                <div class="location-card">
+                    <div class="location-icon">🏗️</div>
+                    <h3>Delhi (Seelampur)</h3>
+                    <p>Old Delhi area, densely populated, commercial and residential properties</p>
+                    <span class="property-count">15+ Properties Available</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <h2 class="section-title">What Our Clients Say</h2>
+            <div class="testimonial-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                    <p>"Bittu ji helped me find the perfect GDA flat in Vasundhara. His knowledge of the area and negotiation skills saved me ₹2 lakhs. Highly recommended!"</p>
+                    <div class="client-info">
+                        <strong>Rajesh Kumar</strong>
+                        <span>Bought 2BHK in Ghaziabad</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                    <p>"Very professional service. Got home loan approved within 5 days with HDFC Bank. Bittu bhai arranged all documents and made the process smooth."</p>
+                    <div class="client-info">
+                        <strong>Sunita Sharma</strong>
+                        <span>Builder Flat in Indirapuram</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                    <p>"Sold my property in Dadri within 15 days at market-best price. Excellent marketing and genuine buyers. Thank you Bittu ji!"</p>
+                    <div class="client-info">
+                        <strong>Amit Singh</strong>
+                        <span>Sold Plot in Dadri</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3>What documents are needed for buying a property?</h3>
+                    <p>You'll need Aadhaar Card, PAN Card, passport-size photos, income proof for loan, and bank statements. We assist with complete documentation.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Can I get a home loan for GDA flats?</h3>
+                    <p>Yes! All major banks provide home loans for GDA flats at competitive rates. We have tie-ups with HDFC, ICICI, Piramal, and Indian Bank.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>What is the processing time for property registration?</h3>
+                    <p>Registration typically takes 2-3 weeks after document verification. Our team handles the complete process including stamp duty and registration.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Do you deal in resale properties?</h3>
+                    <p>Yes, we deal in both new and resale properties. Our resale inventory includes GDA flats, builder apartments, and independent houses.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <h2 class="section-title">Get in Touch</h2>
+            <div class="contact-grid">
+                <div class="contact-form-container">
+                    <form id="contactForm" class="contact-form">
+                        <h3>Enquire Now</h3>
+                        <div class="form-group">
+                            <input type="text" name="name" placeholder="Your Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" name="phone" placeholder="Your Phone Number" required pattern="[0-9]{10}">
+                        </div>
+                        <div class="form-group">
+                            <textarea name="message" placeholder="Your Requirement (Location, Budget, Type)" required rows="4"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Submit Enquiry</button>
+                    </form>
+                </div>
+                <div class="contact-info">
+                    <div class="contact-card">
+                        <h3>Contact Details</h3>
+                        <div class="contact-item">
+                            <span class="contact-icon">📞</span>
+                            <div>
+                                <strong>Primary Phone</strong>
+                                <a href="tel:9899130707">9899130707</a>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-icon">📱</span>
+                            <div>
+                                <strong>Alternate Phone</strong>
+                                <a href="tel:9540110220">9540110220</a>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <div>
+                                <strong>Office Address</strong>
+                                <p>F-163, Sector 11, Pratap Vihar, Ghaziabad</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-icon">🕐</span>
+                            <div>
+                                <strong>Office Hours</strong>
+                                <p>Mon - Sat: 9:00 AM - 7:00 PM<br>Sunday: By Appointment</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Google Maps Embed -->
+    <section class="map-section">
+        <div class="container">
+            <h2 class="section-title">Visit Our Office</h2>
+            <div class="map-container">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3500.123456789!2d77.3910!3d28.6690!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjjCsDQwJzA4LjQiTiA3N8KwMjMnMjcuNiJF!5e0!3m2!1sen!2sin!4v1234567890"
+                    width="100%" 
+                    height="400" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy">
+                </iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Bittu Khari Real Estate</h3>
+                    <p>Your trusted property consultant in Ghaziabad and nearby areas. Specializing in GDA flats, builder apartments, and property consultation.</p>
+                </div>
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <a href="#about">About Us</a>
+                    <a href="#properties">Properties</a>
+                    <a href="#loans">Loan Assistance</a>
+                    <a href="#contact">Contact</a>
+                </div>
+                <div class="footer-col">
+                    <h3>Services</h3>
+                    <a href="#">GDA Flats</a>
+                    <a href="#">Builder Flats</a>
+                    <a href="#">Buy Property</a>
+                    <a href="#">Sell Property</a>
+                </div>
+                <div class="footer-col">
+                    <h3>Contact Us</h3>
+                    <p><strong>Phone:</strong> 9899130707</p>
+                    <p><strong>Alternate:</strong> 9540110220</p>
+                    <p><strong>Address:</strong> F-163, Sector 11,<br>Pratap Vihar, Ghaziabad</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Bittu Khari Real Estate. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/919899130707?text=Hi%20Bittu%20Ji%2C%20I'm%20interested%20in%20properties.%20Please%20share%20details." 
+       class="whatsapp-float" target="_blank">
+        <span class="whatsapp-icon">💬</span>
+    </a>
+
+    <script src="js/api.js"></script>
+    <script src="js/gsap-animations.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
