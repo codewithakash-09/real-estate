@@ -199,8 +199,7 @@ function displayProperties(properties, container) {
         container.appendChild(card);
     });
 }
-
-// COMPLETELY FIXED createPropertyCard function with data attributes
+// Enhanced createPropertyCard function with image carousel
 function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
@@ -240,21 +239,41 @@ function createPropertyCard(property) {
     // Get display image (first image)
     const displayImage = allImages[0];
     
+    // Create thumbnail HTML if multiple images
+    let thumbnailsHtml = '';
+    if (allImages.length > 1) {
+        thumbnailsHtml = `
+            <div class="image-thumbnails">
+                ${allImages.map((img, idx) => `
+                    <div class="thumbnail ${idx === 0 ? 'active' : ''}" data-index="${idx}">
+                        <img src="${img}" alt="Thumbnail ${idx + 1}">
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
     card.innerHTML = `
-        <div class="property-image" style="position: relative; overflow: hidden; height: 250px; background: #f0f0f0;">
+        <div class="property-image" style="position: relative; overflow: hidden; height: 280px; background: #f0f0f0;">
             <img src="${displayImage}" 
                  alt="${property.title}" 
                  class="property-img" 
                  loading="lazy" 
-                 style="width: 100%; height: 250px; object-fit: cover;" 
+                 style="width: 100%; height: 280px; object-fit: cover; transition: transform 0.3s ease;" 
                  onerror="this.onerror=null; this.src='https://via.placeholder.com/800x600?text=Image+Load+Failed'; this.style.objectFit='contain';">
+            
             ${allImages.length > 1 ? `
-                <button class="image-nav-btn prev-btn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.7); color: white; border: none; padding: 10px 14px; cursor: pointer; border-radius: 50%; font-size: 18px; z-index: 10; transition: all 0.3s ease;">❮</button>
-                <button class="image-nav-btn next-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.7); color: white; border: none; padding: 10px 14px; cursor: pointer; border-radius: 50%; font-size: 18px; z-index: 10; transition: all 0.3s ease;">❯</button>
-                <div class="image-counter" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; z-index: 10; font-weight: 500;">1/${allImages.length}</div>
+                <button class="image-nav-btn prev-btn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; padding: 12px 16px; cursor: pointer; border-radius: 50%; font-size: 18px; z-index: 10; transition: all 0.3s ease; backdrop-filter: blur(4px);">❮</button>
+                <button class="image-nav-btn next-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; padding: 12px 16px; cursor: pointer; border-radius: 50%; font-size: 18px; z-index: 10; transition: all 0.3s ease; backdrop-filter: blur(4px);">❯</button>
+                <div class="image-counter" style="position: absolute; bottom: 15px; right: 15px; background: rgba(0,0,0,0.7); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; z-index: 10; font-weight: 500; backdrop-filter: blur(4px);">1/${allImages.length}</div>
+                <div class="image-dots" style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10;">
+                    ${allImages.map((_, idx) => `<span class="dot ${idx === 0 ? 'active' : ''}" data-index="${idx}" style="width: 8px; height: 8px; border-radius: 50%; background: ${idx === 0 ? 'white' : 'rgba(255,255,255,0.5)'}; cursor: pointer; transition: all 0.3s ease;"></span>`).join('')}
+                </div>
             ` : ''}
-            <span class="property-type" style="position: absolute; top: 15px; right: 15px; background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; z-index: 10;">${property.type}</span>
+            
+            <span class="property-type" style="position: absolute; top: 15px; right: 15px; background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; z-index: 10; font-weight: 500;">${property.type}</span>
         </div>
+        ${thumbnailsHtml}
         <div class="property-details">
             <h3>${escapeHtml(property.title)}</h3>
             <div class="property-price">₹${formatPrice(property.price)}</div>
@@ -275,7 +294,6 @@ function createPropertyCard(property) {
     
     return card;
 }
-
 // Helper function to escape HTML and prevent XSS
 function escapeHtml(text) {
     if (!text) return '';
