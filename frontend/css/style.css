@@ -924,6 +924,9 @@ body {
     background-repeat: no-repeat;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .bank-card::before {
@@ -1084,6 +1087,9 @@ body {
     color: #ffffff;
     transition: color 0.3s ease;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    word-wrap: break-word; /* Prevents long names from breaking out */
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .bank-card:hover h3 {
@@ -1132,6 +1138,12 @@ body {
 .bank-card:hover ul li:before {
     color: #4da6ff;
     transform: scale(1.1);
+}
+.bank-card > p,
+.bank-card ul,
+.bank-card ul li {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .bank-card[data-bank="hdfc"]:hover { border-bottom: 3px solid #004B8D; }
@@ -1208,14 +1220,14 @@ body {
 }
 
 @media (max-width: 768px) {
-    .bank-card {
-        padding: 20px;
-    }
-    
     .bank-card h3 {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
+        line-height: 1.3;
     }
     
+    .bank-card {
+        padding: 20px 15px;
+    }
     .bank-card ul li {
         font-size: 0.8rem;
     }
