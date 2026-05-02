@@ -49,17 +49,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Bank cards animation - Speed optimized to fix slow loading
-    gsap.from('.bank-card', {
-        scrollTrigger: {
-            trigger: '.bank-grid',
-            start: 'top 85%'
-        },
-        y: 30,
-        opacity: 0,
-        duration: 0.5,
-        stagger: 0.1,
-        ease: 'power2.out'
-    });
+   gsap.fromTo('.bank-card', 
+  { opacity: 0, y: 30 },
+  {
+    opacity: 1,
+    y: 0,
+    duration: 0.6,
+    stagger: 0.1,
+    ease: 'power2.out',
+    scrollTrigger: {
+      trigger: '.bank-grid',
+      start: 'top 90%',
+      toggleActions: 'play none none none'
+    }
+  }
+);
     
     // Location cards animation - Fixed the blank section issue
     gsap.from('.location-card', {
