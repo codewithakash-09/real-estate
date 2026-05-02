@@ -3,7 +3,7 @@ let authToken = localStorage.getItem('authToken');
 
 // ============= IMGBB CONFIGURATION =============
 // Get your free API key from: https://api.imgbb.com/
-let IMGBB_API_KEY = 'YOUR_API_KEY_HERE';
+let IMGBB_API_KEY = 'd148553dd4554774b60c76aab1ecd1c0';
 
 // ============= IMGBB UPLOAD FUNCTION =============
 async function uploadToImgBB(file) {
