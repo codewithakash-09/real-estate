@@ -28,15 +28,15 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // CORS configuration - Fixed from wildcard
-const corsOptions = {
-    origin: process.env.NODE_ENV === 'production' 
-        ? ['https://yourdomain.com', 'https://www.yourdomain.com']
-        : ['http://localhost:3000', 'http://localhost:5000', 'http://127.0.0.1:5500'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-};
-app.use(cors(corsOptions));
+// const corsOptions = {
+//     origin: process.env.NODE_ENV === 'production' 
+//         ? ['https://yourdomain.com', 'https://www.yourdomain.com']
+//         : ['http://localhost:3000', 'http://localhost:5000', 'http://127.0.0.1:5500'],
+//     methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//     allowedHeaders: ['Content-Type', 'Authorization'],
+//     credentials: true
+// };
+// app.use(cors(corsOptions));
 
 // Body parser with size limits
 app.use(express.json({ limit: '10mb' }));
