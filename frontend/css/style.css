@@ -414,7 +414,7 @@ body {
     font-size: 0.9rem;
 }
 
-/* === IMPROVED LOANS SECTION === */
+/* === LOANS SECTION - COMPLETELY REWRITTEN === */
 .loans {
     padding: 5rem 0;
     background: var(--light);
@@ -512,7 +512,7 @@ body {
     color: var(--dark);
 }
 
-/* === AREAS WE SERVE - IMPROVED === */
+/* === LOCATIONS SECTION - COMPLETELY REWRITTEN === */
 .locations {
     padding: 5rem 0;
     background: var(--white);
@@ -520,19 +520,19 @@ body {
 
 .location-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 2rem;
     margin-top: 3rem;
 }
 
 .location-card {
     background: var(--white);
-    padding: 2rem 1.5rem;
+    padding: 2rem;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     transition: var(--transition);
-    border: 1px solid #eee;
     text-align: center;
+    border: 1px solid #eee;
 }
 
 .location-card:hover {
@@ -544,6 +544,7 @@ body {
 .location-icon {
     font-size: 3rem;
     margin-bottom: 1rem;
+    display: block;
 }
 
 .location-card h3 {
@@ -617,7 +618,7 @@ body {
 
 .faq-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
     gap: 2rem;
     margin-top: 3rem;
 }
@@ -659,7 +660,8 @@ body {
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.form-group select {
     width: 100%;
     padding: 12px 15px;
     border: 2px solid #e0e0e0;
@@ -670,7 +672,8 @@ body {
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
     outline: none;
     border-color: var(--primary);
 }
@@ -686,7 +689,7 @@ body {
     display: flex;
     gap: 1rem;
     margin-bottom: 1.5rem;
-    align-items: start;
+    align-items: flex-start;
 }
 
 .contact-icon {
@@ -829,6 +832,15 @@ body {
     margin-top: 1rem;
     text-align: center;
     display: none;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 1rem;
+    text-align: center;
 }
 
 /* === RESPONSIVE DESIGN === */
