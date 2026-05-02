@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
+const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
@@ -10,7 +11,80 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
-let dbConnection = false; // ADD THIS LINE - FIXES dbConnection error
+let dbConnection = false;
+
+// ============= JSON FILE STORAGE (FALLBACK) =============
+const dataPath = path.join(__dirname, 'data.json');
+
+// Load data from file
+function loadData() {
+    try {
+        if (fs.existsSync(dataPath)) {
+            const data = fs.readFileSync(dataPath, 'utf8');
+            const parsed = JSON.parse(data);
+            return { 
+                properties: parsed.properties || [], 
+                leads: parsed.leads || [] 
+            };
+        }
+    } catch (error) {
+        console.error('Error loading data:', error);
+    }
+    return { properties: [], leads: [] };
+}
+
+// Save data to file
+function saveData(properties, leads) {
+    try {
+        const data = { properties, leads, lastUpdated: new Date().toISOString() };
+        fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
+        console.log('💾 Data saved to JSON file');
+    } catch (error) {
+        console.error('Error saving data:', error);
+    }
+}
+
+// Load initial data
+let savedData = loadData();
+let properties = savedData.properties;
+let leads = savedData.leads;
+
+// If no properties exist, add default sample data
+if (properties.length === 0) {
+    properties = [
+        {
+            _id: "1",
+            title: '2BHK GDA Flat in Vaishali',
+            price: 3500000,
+            location: 'Ghaziabad',
+            type: 'GDA Flat',
+            bedrooms: 2,
+            bathrooms: 2,
+            area: 850,
+            description: 'Beautiful GDA flat in prime location of Vaishali, near metro station',
+            status: 'Available',
+            images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'],
+            mainImage: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
+            createdAt: new Date().toISOString()
+        },
+        {
+            _id: "2",
+            title: '3BHK Builder Apartment Indirapuram',
+            price: 7500000,
+            location: 'Ghaziabad',
+            type: 'Builder Flat',
+            bedrooms: 3,
+            bathrooms: 3,
+            area: 1450,
+            description: 'Luxurious builder apartment in Indirapuram with modern amenities',
+            status: 'Available',
+            images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'],
+            mainImage: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
+            createdAt: new Date().toISOString()
+        }
+    ];
+    saveData(properties, leads);
+}
 
 // Security Middleware
 app.use(helmet({
@@ -28,7 +102,7 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// CORS configuration - UNCOMMENT AND FIX THIS
+// CORS configuration
 const corsOptions = {
     origin: process.env.NODE_ENV === 'production' 
         ? ['https://yourdomain.com', 'https://www.yourdomain.com']
@@ -55,11 +129,11 @@ const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
     console.error('❌ MONGODB_URI is not defined in environment variables!');
-    console.log('⚠️  Using in-memory fallback mode');
+    console.log('⚠️  Using JSON file storage mode');
 } else {
     if (!MONGODB_URI.startsWith('mongodb://') && !MONGODB_URI.startsWith('mongodb+srv://')) {
         console.error('❌ Invalid MONGODB_URI format');
-        console.log('⚠️  Using in-memory fallback mode');
+        console.log('⚠️  Using JSON file storage mode');
     } else {
         mongoose.connect(MONGODB_URI, {
             serverSelectionTimeoutMS: 5000,
@@ -72,7 +146,7 @@ if (!MONGODB_URI) {
         })
         .catch(err => {
             console.error('❌ MongoDB Connection Error:', err.message);
-            console.log('⚠️  Continuing with in-memory fallback...');
+            console.log('⚠️  Falling back to JSON file storage');
             dbConnection = false;
         });
     }
@@ -110,102 +184,6 @@ if (mongoose.connection.readyState === 1) {
     Lead = mongoose.model('Lead', leadSchema);
 }
 
-// ============= IN-MEMORY FALLBACK =============
-let properties = [
-    {
-        _id: "1",
-        title: '2BHK GDA Flat in Vaishali',
-        price: 3500000,
-        location: 'Ghaziabad',
-        type: 'GDA Flat',
-        bedrooms: 2,
-        bathrooms: 2,
-        area: 850,
-        description: 'Beautiful GDA flat in prime location of Vaishali, near metro station',
-        status: 'Available',
-        images: ['https://via.placeholder.com/800x600?text=Image+1'],
-        mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
-        createdAt: new Date().toISOString()
-    },
-    {
-        _id: "2",
-        title: '3BHK Builder Apartment Indirapuram',
-        price: 7500000,
-        location: 'Ghaziabad',
-        type: 'Builder Flat',
-        bedrooms: 3,
-        bathrooms: 3,
-        area: 1450,
-        description: 'Luxurious builder apartment in Indirapuram with modern amenities',
-        status: 'Available',
-        images: ['https://via.placeholder.com/800x600?text=Image+1'],
-        mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
-        createdAt: new Date().toISOString()
-    },
-    {
-        _id: "3",
-        title: '1BHK GDA Flat Raj Nagar',
-        price: 1800000,
-        location: 'Ghaziabad',
-        type: 'GDA Flat',
-        bedrooms: 1,
-        bathrooms: 1,
-        area: 500,
-        description: 'Affordable GDA flat in Raj Nagar Extension',
-        status: 'Available',
-        images: ['https://via.placeholder.com/800x600?text=Image+1'],
-        mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
-        createdAt: new Date().toISOString()
-    },
-    {
-        _id: "4",
-        title: '2BHK Builder Floor in Dadri',
-        price: 2500000,
-        location: 'Dadri',
-        type: 'Builder Flat',
-        bedrooms: 2,
-        bathrooms: 2,
-        area: 900,
-        description: 'Well-maintained builder floor near Greater Noida',
-        status: 'Available',
-        images: ['https://via.placeholder.com/800x600?text=Image+1'],
-        mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
-        createdAt: new Date().toISOString()
-    },
-    {
-        _id: "5",
-        title: '3BHK Independent House Loni',
-        price: 4500000,
-        location: 'Loni',
-        type: 'Builder Flat',
-        bedrooms: 3,
-        bathrooms: 3,
-        area: 1800,
-        description: 'Spacious independent house with parking',
-        status: 'Available',
-        images: ['https://via.placeholder.com/800x600?text=Image+1'],
-        mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
-        createdAt: new Date().toISOString()
-    },
-    {
-        _id: "6",
-        title: '2BHK GDA Flat Hapur',
-        price: 1500000,
-        location: 'Hapur',
-        type: 'GDA Flat',
-        bedrooms: 2,
-        bathrooms: 2,
-        area: 750,
-        description: 'Budget-friendly GDA flat on NH-24',
-        status: 'Available',
-        images: ['https://via.placeholder.com/800x600?text=Image+1'],
-        mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
-        createdAt: new Date().toISOString()
-    }
-];
-
-let leads = [];
-
 // ============= AUTH MIDDLEWARE =============
 const authMiddleware = (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -223,7 +201,14 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-// ============= PROPERTY ROUTES - ADD THESE BACK =============
+// Helper function to save JSON data
+function persistData() {
+    if (!dbConnection) {
+        saveData(properties, leads);
+    }
+}
+
+// ============= PROPERTY ROUTES =============
 
 // GET all properties
 app.get('/api/properties', async (req, res) => {
@@ -273,7 +258,7 @@ app.get('/api/properties/:id', async (req, res) => {
     }
 });
 
-// POST create property - ONLY ONE, IN THE RIGHT PLACE
+// POST create property
 app.post('/api/properties', authMiddleware, async (req, res) => {
     try {
         console.log('📝 Received property data:', {
@@ -295,7 +280,8 @@ app.post('/api/properties', authMiddleware, async (req, res) => {
             createdAt: new Date().toISOString()
         };
         properties.push(newProperty);
-        console.log('💾 Property saved in-memory');
+        persistData(); // Save to JSON file
+        console.log('💾 Property saved to JSON file');
         res.status(201).json(newProperty);
     } catch (error) {
         console.error('❌ Error creating property:', error);
@@ -318,7 +304,8 @@ app.put('/api/properties/:id', authMiddleware, async (req, res) => {
         const index = properties.findIndex(p => p._id === req.params.id);
         if (index === -1) return res.status(404).json({ message: 'Property not found' });
         properties[index] = { ...properties[index], ...req.body };
-        console.log('💾 Property updated in-memory');
+        persistData(); // Save to JSON file
+        console.log('💾 Property updated in JSON file');
         res.json(properties[index]);
     } catch (error) {
         console.error('❌ Error updating property:', error);
@@ -338,6 +325,7 @@ app.delete('/api/properties/:id', authMiddleware, async (req, res) => {
         const index = properties.findIndex(p => p._id === req.params.id);
         if (index === -1) return res.status(404).json({ message: 'Property not found' });
         properties.splice(index, 1);
+        persistData(); // Save to JSON file
         res.json({ message: 'Property deleted successfully' });
     } catch (error) {
         console.error('Error deleting property:', error);
@@ -372,7 +360,8 @@ app.post('/api/leads', async (req, res) => {
             createdAt: new Date().toISOString()
         };
         leads.push(lead);
-        console.log('📞 Lead saved in-memory:', { name, phone });
+        persistData(); // Save to JSON file
+        console.log('📞 Lead saved to JSON file:', { name, phone });
         res.status(201).json({ message: 'Lead submitted successfully' });
     } catch (error) {
         console.error('Error saving lead:', error);
@@ -409,6 +398,7 @@ app.put('/api/leads/:id', authMiddleware, async (req, res) => {
         if (index === -1) return res.status(404).json({ message: 'Lead not found' });
         if (status) leads[index].status = status;
         if (notes) leads[index].notes = notes;
+        persistData(); // Save to JSON file
         res.json(leads[index]);
     } catch (error) {
         console.error('Error updating lead:', error);
@@ -479,7 +469,7 @@ app.get('/api/health', async (req, res) => {
         timestamp: new Date().toISOString(),
         mongodb: dbStatus,
         databaseResponding: dbResponding,
-        storage: dbResponding ? 'MongoDB' : 'in-memory',
+        storage: dbResponding ? 'MongoDB' : (fs.existsSync(dataPath) ? 'JSON File' : 'In-Memory'),
         propertiesCount: properties.length,
         leadsCount: leads.length,
         environment: process.env.NODE_ENV || 'development'
@@ -527,7 +517,7 @@ app.get('/sitemap.xml', async (req, res) => {
         sitemap += `
   <url>
     <loc>${baseUrl}/property/${property._id}</loc>
-    <lastmod>${property.updatedAt ? property.updatedAt.toISOString().split('T')[0] : currentDate}</lastmod>
+    <lastmod>property.updatedAt ? property.updatedAt.toISOString().split('T')[0] : currentDate}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>`;
@@ -538,6 +528,15 @@ app.get('/sitemap.xml', async (req, res) => {
     
     res.header('Content-Type', 'application/xml');
     res.send(sitemap);
+});
+
+// Export data endpoint (for backup)
+app.get('/api/export-data', (req, res) => {
+    res.json({
+        properties: properties,
+        leads: leads,
+        exportedAt: new Date().toISOString()
+    });
 });
 
 // Catch-all route for frontend (must be last)
@@ -565,11 +564,14 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`📞 Leads API: http://localhost:${PORT}/api/leads`);
     console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth/login`);
     console.log(`🏥 Health: http://localhost:${PORT}/api/health`);
+    console.log(`💾 Export: http://localhost:${PORT}/api/export-data`);
     console.log('=================================');
     console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
     
     if (mongoose.connection.readyState === 1) {
         console.log('💾 Using MongoDB Database ✅');
+    } else if (fs.existsSync(dataPath)) {
+        console.log('💾 Using JSON File Storage ✅ (Data persists across restarts!)');
     } else {
         console.log('💾 Using In-Memory Database ⚠️');
     }
