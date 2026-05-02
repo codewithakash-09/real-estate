@@ -67,17 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await submitLead(formData);
                 
-                // Show success message
                 const successDiv = document.createElement('div');
                 successDiv.className = 'success-message';
                 successDiv.textContent = 'Thank you! We will contact you shortly.';
                 successDiv.style.display = 'block';
                 contactForm.appendChild(successDiv);
                 
-                // Reset form
                 contactForm.reset();
                 
-                // Remove success message after 5 seconds
                 setTimeout(() => {
                     successDiv.remove();
                 }, 5000);
@@ -90,147 +87,90 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Global event delegation for image navigation buttons - FIXED
+    // Setup image navigation
     setupGlobalImageNavigation();
 });
 
-// Global event delegation function - THIS FIXES THE ISSUE
-// Enhanced global image navigation with thumbnail support
+// Global image navigation setup
 function setupGlobalImageNavigation() {
-    // Use event delegation on the entire document
     document.addEventListener('click', function(e) {
-        // Handle previous button clicks
+        // Handle previous button
         if (e.target.classList && e.target.classList.contains('prev-btn')) {
             e.stopPropagation();
             e.preventDefault();
-            navigateImage(e.target.closest('.property-card'), 'prev');
+            const card = e.target.closest('.property-card');
+            if (card) {
+                changeImage(card, -1);
+            }
         }
         
-        // Handle next button clicks
+        // Handle next button
         if (e.target.classList && e.target.classList.contains('next-btn')) {
             e.stopPropagation();
             e.preventDefault();
-            navigateImage(e.target.closest('.property-card'), 'next');
-        }
-        
-        // Handle dot clicks
-        if (e.target.classList && e.target.classList.contains('dot')) {
-            e.stopPropagation();
-            const index = parseInt(e.target.getAttribute('data-index'));
-            navigateToImage(e.target.closest('.property-card'), index);
-        }
-        
-        // Handle thumbnail clicks
-        if (e.target.closest('.thumbnail')) {
-            e.stopPropagation();
-            const thumbnail = e.target.closest('.thumbnail');
-            const index = parseInt(thumbnail.getAttribute('data-index'));
-            navigateToImage(e.target.closest('.property-card'), index);
-        }
-    });
-    
-    // Add keyboard navigation for modal (optional)
-    document.addEventListener('keydown', function(e) {
-        const activeModal = document.querySelector('.image-modal.active');
-        if (activeModal) {
-            if (e.key === 'ArrowLeft') {
-                const card = activeModal.dataset.card;
-                navigateImage(document.querySelector(`.property-card[data-id="${card}"]`), 'prev');
-            } else if (e.key === 'ArrowRight') {
-                const card = activeModal.dataset.card;
-                navigateImage(document.querySelector(`.property-card[data-id="${card}"]`), 'next');
-            } else if (e.key === 'Escape') {
-                closeModal();
+            const card = e.target.closest('.property-card');
+            if (card) {
+                changeImage(card, 1);
             }
         }
     });
 }
-// Navigation helper function
-function navigateImage(card, direction) {
-    if (!card) return;
-    
-    let currentIndex = parseInt(card.getAttribute('data-current-image') || '0');
-    const totalImages = parseInt(card.getAttribute('data-total-images') || '0');
-    const imagesJson = card.getAttribute('data-images');
-    
-    if (imagesJson && totalImages > 0) {
-        const images = JSON.parse(imagesJson);
-        
-        if (direction === 'next') {
-            currentIndex = (currentIndex + 1) % totalImages;
-        } else if (direction === 'prev') {
-            currentIndex = (currentIndex - 1 + totalImages) % totalImages;
-        }
-        
-        updateCardImage(card, images, currentIndex, totalImages);
-    }
-}
 
-// Navigate to specific image
-function navigateToImage(card, index) {
-    if (!card) return;
+// Function to change image
+function changeImage(card, direction) {
+    const images = JSON.parse(card.getAttribute('data-images') || '[]');
+    let currentIndex = parseInt(card.getAttribute('data-current-index') || '0');
+    const totalImages = images.length;
     
-    const totalImages = parseInt(card.getAttribute('data-total-images') || '0');
-    const imagesJson = card.getAttribute('data-images');
+    if (totalImages === 0) return;
     
-    if (imagesJson && totalImages > 0 && index >= 0 && index < totalImages) {
-        const images = JSON.parse(imagesJson);
-        updateCardImage(card, images, index, totalImages);
-    }
-}
-
-// Update card image and UI elements
-function updateCardImage(card, images, newIndex, totalImages) {
+    // Calculate new index
+    let newIndex = currentIndex + direction;
+    if (newIndex < 0) newIndex = totalImages - 1;
+    if (newIndex >= totalImages) newIndex = 0;
+    
+    // Update the main image
     const imgElement = card.querySelector('.property-img');
-    const counter = card.querySelector('.image-counter');
-    const dots = card.querySelectorAll('.dot');
-    const thumbnails = card.querySelectorAll('.thumbnail');
-    
-    // Update main image with fade effect
     if (imgElement) {
-        imgElement.style.opacity = '0.5';
         imgElement.src = images[newIndex];
-        imgElement.onload = () => {
-            imgElement.style.opacity = '1';
-        };
     }
     
     // Update counter
+    const counter = card.querySelector('.image-counter');
     if (counter) {
         counter.textContent = `${newIndex + 1}/${totalImages}`;
     }
     
     // Update dots
-    dots.forEach((dot, idx) => {
-        if (idx === newIndex) {
-            dot.classList.add('active');
-            dot.style.background = 'white';
-        } else {
-            dot.classList.remove('active');
-            dot.style.background = 'rgba(255,255,255,0.5)';
-        }
-    });
+    const dots = card.querySelectorAll('.dot');
+    if (dots.length > 0) {
+        dots.forEach((dot, idx) => {
+            if (idx === newIndex) {
+                dot.style.background = 'white';
+                dot.classList.add('active');
+            } else {
+                dot.style.background = 'rgba(255,255,255,0.5)';
+                dot.classList.remove('active');
+            }
+        });
+    }
     
     // Update thumbnails
-    thumbnails.forEach((thumb, idx) => {
-        if (idx === newIndex) {
-            thumb.classList.add('active');
-        } else {
-            thumb.classList.remove('active');
-        }
-    });
-    
-    // Store the new current index
-    card.setAttribute('data-current-image', newIndex);
-    
-    // Add a subtle pop animation to the counter
-    if (counter) {
-        counter.style.transform = 'scale(1.2)';
-        setTimeout(() => {
-            counter.style.transform = 'scale(1)';
-        }, 200);
+    const thumbnails = card.querySelectorAll('.thumbnail');
+    if (thumbnails.length > 0) {
+        thumbnails.forEach((thumb, idx) => {
+            if (idx === newIndex) {
+                thumb.classList.add('active');
+            } else {
+                thumb.classList.remove('active');
+            }
+        });
     }
+    
+    // Save new index
+    card.setAttribute('data-current-index', newIndex);
 }
+
 // Load and display properties
 async function loadProperties() {
     const propertyGrid = document.getElementById('propertyGrid');
@@ -239,7 +179,7 @@ async function loadProperties() {
     if (!propertyGrid) return;
     
     try {
-        loadingSpinner.style.display = 'block';
+        if (loadingSpinner) loadingSpinner.style.display = 'block';
         const properties = await fetchProperties();
         
         if (properties.length === 0) {
@@ -251,67 +191,67 @@ async function loadProperties() {
         console.error('Error loading properties:', error);
         displaySampleProperties(propertyGrid);
     } finally {
-        loadingSpinner.style.display = 'none';
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
     }
 }
 
-// Display properties from API
 function displayProperties(properties, container) {
     container.innerHTML = '';
-    
     properties.forEach(property => {
         const card = createPropertyCard(property);
         container.appendChild(card);
     });
 }
-// Enhanced createPropertyCard function with image carousel
+
+// Create property card with working navigation buttons
 function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
     
-    // Get all images for gallery
+    // Get all images
     let allImages = [];
     
-    // Check for images array first
     if (property.images && Array.isArray(property.images) && property.images.length > 0) {
         allImages = property.images;
-    } 
-    // Check for mainImage
-    else if (property.mainImage && property.mainImage.trim() !== '') {
+    } else if (property.mainImage && property.mainImage.trim() !== '') {
         allImages = [property.mainImage];
-    }
-    // Check for old image field
-    else if (property.image && property.image.trim() !== '') {
+    } else if (property.image && property.image.trim() !== '') {
         allImages = [property.image];
-    }
-    // Fallback placeholder
-    else {
+    } else {
         allImages = ['https://via.placeholder.com/800x600?text=Property+Image'];
     }
     
-    // Filter out empty URLs
     allImages = allImages.filter(img => img && img.trim() !== '');
-    
     if (allImages.length === 0) {
         allImages = ['https://via.placeholder.com/800x600?text=Property+Image'];
     }
     
-    // Store images as JSON on the card for global navigation
+    // Store images data
     card.setAttribute('data-images', JSON.stringify(allImages));
+    card.setAttribute('data-current-index', '0');
     card.setAttribute('data-total-images', allImages.length);
-    card.setAttribute('data-current-image', '0');
     
-    // Get display image (first image)
     const displayImage = allImages[0];
+    const hasMultipleImages = allImages.length > 1;
     
-    // Create thumbnail HTML if multiple images
+    // Create dots HTML
+    let dotsHtml = '';
+    if (hasMultipleImages) {
+        dotsHtml = `
+            <div class="image-dots" style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10;">
+                ${allImages.map((_, idx) => `<span class="dot ${idx === 0 ? 'active' : ''}" data-index="${idx}" style="width: 8px; height: 8px; border-radius: 50%; background: ${idx === 0 ? 'white' : 'rgba(255,255,255,0.5)'}; cursor: pointer; transition: all 0.3s ease;"></span>`).join('')}
+            </div>
+        `;
+    }
+    
+    // Create thumbnails HTML
     let thumbnailsHtml = '';
-    if (allImages.length > 1) {
+    if (hasMultipleImages) {
         thumbnailsHtml = `
-            <div class="image-thumbnails">
+            <div class="image-thumbnails" style="display: flex; gap: 8px; padding: 10px; background: rgba(0,0,0,0.05); overflow-x: auto;">
                 ${allImages.map((img, idx) => `
-                    <div class="thumbnail ${idx === 0 ? 'active' : ''}" data-index="${idx}">
-                        <img src="${img}" alt="Thumbnail ${idx + 1}">
+                    <div class="thumbnail ${idx === 0 ? 'active' : ''}" data-index="${idx}" style="width: 60px; height: 60px; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid ${idx === 0 ? '#4da6ff' : 'transparent'}; flex-shrink: 0;">
+                        <img src="${img}" alt="Thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                 `).join('')}
             </div>
@@ -324,19 +264,17 @@ function createPropertyCard(property) {
                  alt="${property.title}" 
                  class="property-img" 
                  loading="lazy" 
-                 style="width: 100%; height: 280px; object-fit: cover; transition: transform 0.3s ease;" 
+                 style="width: 100%; height: 280px; object-fit: cover;" 
                  onerror="this.onerror=null; this.src='https://via.placeholder.com/800x600?text=Image+Load+Failed'; this.style.objectFit='contain';">
             
-            ${allImages.length > 1 ? `
-                <button class="image-nav-btn prev-btn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; padding: 12px 16px; cursor: pointer; border-radius: 50%; font-size: 18px; z-index: 10; transition: all 0.3s ease; backdrop-filter: blur(4px);">❮</button>
-                <button class="image-nav-btn next-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; padding: 12px 16px; cursor: pointer; border-radius: 50%; font-size: 18px; z-index: 10; transition: all 0.3s ease; backdrop-filter: blur(4px);">❯</button>
-                <div class="image-counter" style="position: absolute; bottom: 15px; right: 15px; background: rgba(0,0,0,0.7); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; z-index: 10; font-weight: 500; backdrop-filter: blur(4px);">1/${allImages.length}</div>
-                <div class="image-dots" style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10;">
-                    ${allImages.map((_, idx) => `<span class="dot ${idx === 0 ? 'active' : ''}" data-index="${idx}" style="width: 8px; height: 8px; border-radius: 50%; background: ${idx === 0 ? 'white' : 'rgba(255,255,255,0.5)'}; cursor: pointer; transition: all 0.3s ease;"></span>`).join('')}
-                </div>
+            ${hasMultipleImages ? `
+                <button class="image-nav-btn prev-btn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; padding: 10px 14px; cursor: pointer; border-radius: 50%; font-size: 18px; z-index: 10; transition: all 0.3s ease;">❮</button>
+                <button class="image-nav-btn next-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; padding: 10px 14px; cursor: pointer; border-radius: 50%; font-size: 18px; z-index: 10; transition: all 0.3s ease;">❯</button>
+                <div class="image-counter" style="position: absolute; bottom: 15px; right: 15px; background: rgba(0,0,0,0.7); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; z-index: 10; font-weight: 500;">1/${allImages.length}</div>
+                ${dotsHtml}
             ` : ''}
             
-            <span class="property-type" style="position: absolute; top: 15px; right: 15px; background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; z-index: 10; font-weight: 500;">${property.type}</span>
+            <span class="property-type" style="position: absolute; top: 15px; right: 15px; background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; z-index: 10;">${property.type}</span>
         </div>
         ${thumbnailsHtml}
         <div class="property-details">
@@ -357,9 +295,97 @@ function createPropertyCard(property) {
         </div>
     `;
     
+    // Add click handlers for thumbnails
+    if (hasMultipleImages) {
+        const thumbnails = card.querySelectorAll('.thumbnail');
+        thumbnails.forEach((thumb, idx) => {
+            thumb.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const images = JSON.parse(card.getAttribute('data-images'));
+                const imgElement = card.querySelector('.property-img');
+                const counter = card.querySelector('.image-counter');
+                const dots = card.querySelectorAll('.dot');
+                const allThumbnails = card.querySelectorAll('.thumbnail');
+                
+                // Update image
+                imgElement.src = images[idx];
+                
+                // Update counter
+                if (counter) counter.textContent = `${idx + 1}/${images.length}`;
+                
+                // Update dots
+                dots.forEach((dot, i) => {
+                    if (i === idx) {
+                        dot.style.background = 'white';
+                        dot.classList.add('active');
+                    } else {
+                        dot.style.background = 'rgba(255,255,255,0.5)';
+                        dot.classList.remove('active');
+                    }
+                });
+                
+                // Update thumbnails
+                allThumbnails.forEach((thumbEl, i) => {
+                    if (i === idx) {
+                        thumbEl.classList.add('active');
+                        thumbEl.style.borderColor = '#4da6ff';
+                    } else {
+                        thumbEl.classList.remove('active');
+                        thumbEl.style.borderColor = 'transparent';
+                    }
+                });
+                
+                card.setAttribute('data-current-index', idx);
+            });
+        });
+        
+        // Add click handlers for dots
+        const dots = card.querySelectorAll('.dot');
+        dots.forEach((dot, idx) => {
+            dot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const images = JSON.parse(card.getAttribute('data-images'));
+                const imgElement = card.querySelector('.property-img');
+                const counter = card.querySelector('.image-counter');
+                const allDots = card.querySelectorAll('.dot');
+                const thumbnails = card.querySelectorAll('.thumbnail');
+                
+                // Update image
+                imgElement.src = images[idx];
+                
+                // Update counter
+                if (counter) counter.textContent = `${idx + 1}/${images.length}`;
+                
+                // Update dots
+                allDots.forEach((dotEl, i) => {
+                    if (i === idx) {
+                        dotEl.style.background = 'white';
+                        dotEl.classList.add('active');
+                    } else {
+                        dotEl.style.background = 'rgba(255,255,255,0.5)';
+                        dotEl.classList.remove('active');
+                    }
+                });
+                
+                // Update thumbnails
+                thumbnails.forEach((thumbEl, i) => {
+                    if (i === idx) {
+                        thumbEl.classList.add('active');
+                        thumbEl.style.borderColor = '#4da6ff';
+                    } else {
+                        thumbEl.classList.remove('active');
+                        thumbEl.style.borderColor = 'transparent';
+                    }
+                });
+                
+                card.setAttribute('data-current-index', idx);
+            });
+        });
+    }
+    
     return card;
 }
-// Helper function to escape HTML and prevent XSS
+
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -367,12 +393,10 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Format price to Indian format
 function formatPrice(price) {
     return price.toLocaleString('en-IN');
 }
 
-// Property filters
 function filterProperties() {
     const location = document.getElementById('locationFilter')?.value || '';
     const type = document.getElementById('typeFilter')?.value || '';
@@ -391,7 +415,6 @@ function filterProperties() {
     applyFilters(filters);
 }
 
-// Apply filters and reload properties
 async function applyFilters(filters) {
     const propertyGrid = document.getElementById('propertyGrid');
     const loadingSpinner = document.getElementById('loadingSpinner');
@@ -409,7 +432,6 @@ async function applyFilters(filters) {
     }
 }
 
-// Display sample properties (fallback when API is not connected)
 function displaySampleProperties(container) {
     const sampleProperties = [
         {
@@ -422,7 +444,11 @@ function displaySampleProperties(container) {
             bathrooms: 2,
             area: 850,
             description: 'Beautiful GDA flat in prime location of Vaishali, near metro station',
-            images: ['https://via.placeholder.com/800x600?text=Image+1'],
+            images: [
+                'https://via.placeholder.com/800x600?text=Image+1',
+                'https://via.placeholder.com/800x600?text=Image+2',
+                'https://via.placeholder.com/800x600?text=Image+3'
+            ],
             mainImage: 'https://via.placeholder.com/800x600?text=Main+Image'
         },
         {
@@ -435,59 +461,10 @@ function displaySampleProperties(container) {
             bathrooms: 3,
             area: 1450,
             description: 'Luxurious builder apartment in Indirapuram with modern amenities',
-            images: ['https://via.placeholder.com/800x600?text=Image+1'],
-            mainImage: 'https://via.placeholder.com/800x600?text=Main+Image'
-        },
-        {
-            _id: "sample3",
-            title: '1BHK GDA Flat Raj Nagar',
-            price: 1800000,
-            location: 'Ghaziabad',
-            type: 'GDA Flat',
-            bedrooms: 1,
-            bathrooms: 1,
-            area: 500,
-            description: 'Affordable GDA flat in Raj Nagar Extension, perfect for small families',
-            images: ['https://via.placeholder.com/800x600?text=Image+1'],
-            mainImage: 'https://via.placeholder.com/800x600?text=Main+Image'
-        },
-        {
-            _id: "sample4",
-            title: '2BHK Builder Floor in Dadri',
-            price: 2500000,
-            location: 'Dadri',
-            type: 'Builder Flat',
-            bedrooms: 2,
-            bathrooms: 2,
-            area: 900,
-            description: 'Well-maintained builder floor near Greater Noida, good connectivity',
-            images: ['https://via.placeholder.com/800x600?text=Image+1'],
-            mainImage: 'https://via.placeholder.com/800x600?text=Main+Image'
-        },
-        {
-            _id: "sample5",
-            title: '3BHK Independent House Loni',
-            price: 4500000,
-            location: 'Loni',
-            type: 'Builder Flat',
-            bedrooms: 3,
-            bathrooms: 3,
-            area: 1800,
-            description: 'Spacious independent house with parking and garden area',
-            images: ['https://via.placeholder.com/800x600?text=Image+1'],
-            mainImage: 'https://via.placeholder.com/800x600?text=Main+Image'
-        },
-        {
-            _id: "sample6",
-            title: '2BHK GDA Flat Hapur',
-            price: 1500000,
-            location: 'Hapur',
-            type: 'GDA Flat',
-            bedrooms: 2,
-            bathrooms: 2,
-            area: 750,
-            description: 'Budget-friendly GDA flat on NH-24, perfect for investment',
-            images: ['https://via.placeholder.com/800x600?text=Image+1'],
+            images: [
+                'https://via.placeholder.com/800x600?text=Image+1',
+                'https://via.placeholder.com/800x600?text=Image+2'
+            ],
             mainImage: 'https://via.placeholder.com/800x600?text=Main+Image'
         }
     ];
