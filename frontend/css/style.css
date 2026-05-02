@@ -18,6 +18,10 @@
     --shadow-lg: 0 10px 40px rgba(0,0,0,0.15);
     --radius: 12px;
     --transition: all 0.3s ease;
+    --bg-transform: scale(1);
+    --bg-opacity: 0.15;
+    --mouse-x: 0;
+    --mouse-y: 0;
 }
 
 html {
