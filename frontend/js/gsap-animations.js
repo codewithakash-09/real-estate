@@ -23,9 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
         .from('.hero-cta .btn', { y: 20, opacity: 0, duration: 0.6, stagger: 0.2, ease: 'back.out(1.7)' }, '-=0.3')
         .from('.badge', { scale: 0, opacity: 0, duration: 0.5, stagger: 0.1, ease: 'back.out(1.7)' }, '-=0.5');
     
-    // Section headings animation
-    const headings = document.querySelectorAll('.section-title, .section-subtitle');
-    headings.forEach(heading => {
+    // FIXED: Section headings animation - only for h2.section-title, not h3
+    const sectionHeadings = document.querySelectorAll('h2.section-title');
+    sectionHeadings.forEach(heading => {
         gsap.from(heading, {
             scrollTrigger: {
                 trigger: heading,
@@ -120,9 +120,28 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
+    // FIXED: Background Image Parallax & Animation Effects
+    // REMOVED the Intersection Observer that was hiding sections
+    // Sections should NOT start with opacity: 0
+    
+    // Mouse parallax effect on background
+    document.addEventListener('mousemove', (e) => {
+        const mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+        const mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+        
+        document.documentElement.style.setProperty('--mouse-x', mouseX * 5);
+        document.documentElement.style.setProperty('--mouse-y', mouseY * 5);
+    });
+    
+    // Parallax effect on scroll
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        document.documentElement.style.setProperty('--bg-opacity', Math.min(0.15 + scrollY * 0.0002, 0.25));
+    });
 });
 
-// ============= BANK CARD FUNCTIONS (defined outside DOMContentLoaded) =============
+// ============= BANK CARD FUNCTIONS =============
 
 function initBankCardAnimations() {
     const bankCards = document.querySelectorAll('.bank-card');
@@ -226,68 +245,7 @@ function addCTAStyle() {
     `;
     document.head.appendChild(style);
 }
-// Background Image Parallax & Animation Effects
-document.addEventListener('DOMContentLoaded', () => {
-    // Parallax effect on scroll
-    window.addEventListener('scroll', () => {
-        const scrollY = window.scrollY;
-        const bodyBefore = document.querySelector('body');
-        
-        if (bodyBefore) {
-            const style = getComputedStyle(bodyBefore, '::before');
-            const transform = `scale(${1 + scrollY * 0.0001}) translateY(${scrollY * 0.02}px)`;
-            // We can't directly modify pseudo-elements, so we use CSS custom properties
-            document.documentElement.style.setProperty('--bg-transform', transform);
-            document.documentElement.style.setProperty('--bg-opacity', Math.min(0.15 + scrollY * 0.0002, 0.25));
-        }
-    });
-    
-    // Intersection Observer for smooth section reveals
-    const sections = document.querySelectorAll('section');
-    
-    const sectionObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, {
-        threshold: 0.1
-    });
-    
-    sections.forEach(section => {
-        section.style.opacity = '0';
-        section.style.transform = 'translateY(30px)';
-        section.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-        sectionObserver.observe(section);
-    });
-    
-    // Mouse parallax effect on background
-    document.addEventListener('mousemove', (e) => {
-        const mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-        const mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-        
-        document.documentElement.style.setProperty('--mouse-x', mouseX * 5);
-        document.documentElement.style.setProperty('--mouse-y', mouseY * 5);
-    });
-});
 
-// Add this to make the pseudo-element respond to mouse movement
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-    @keyframes mouseParallax {
-        0% { transform: translate(0, 0); }
-        100% { transform: translate(calc(var(--mouse-x) * 1px), calc(var(--mouse-y) * 1px)); }
-    }
-    
-    body::before {
-        animation: 
-            fadeInBackground 2s ease-in-out forwards,
-            mouseParallax 3s ease-out infinite alternate !important;
-    }
-`;
-document.head.appendChild(styleSheet);
 function add3DTiltEffect() {
     const cards = document.querySelectorAll('.bank-card');
     
@@ -309,10 +267,24 @@ function add3DTiltEffect() {
         });
     });
 }
+
+// FIXED: This script should NOT set sections to opacity:0
+// The old code that was hiding sections has been removed
+
+// Add mouse parallax to body::before pseudo-element
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
+    @keyframes mouseParallax {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(calc(var(--mouse-x) * 1px), calc(var(--mouse-y) * 1px)); }
+    }
+`;
+document.head.appendChild(styleSheet);
+
 // ============= YELLOW GLOW SPARKLE EFFECTS =============
 document.addEventListener('DOMContentLoaded', () => {
-    // Add sparkles to all section titles
-    const sectionTitles = document.querySelectorAll('.section-title, .hero-title');
+    // Add sparkles to all h2 section titles only (not h3 FAQ items)
+    const sectionTitles = document.querySelectorAll('h2.section-title, .hero-title');
     
     sectionTitles.forEach(title => {
         // Set relative position for sparkle container
@@ -356,8 +328,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // GSAP Animation for section titles
-    gsap.utils.toArray('.section-title').forEach(title => {
+    // FIXED: Only animate h2.section-title, not h3 elements
+    gsap.utils.toArray('h2.section-title').forEach(title => {
         gsap.from(title, {
             scrollTrigger: {
                 trigger: title,
