@@ -344,16 +344,18 @@ app.put('/api/leads/:id', authMiddleware, async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 });
-
 // ============= AUTH ROUTES =============
 
-const ADMIN_PASSWORD_HASH = bcrypt.hashSync('akash@1234', 10);
+// Read admin credentials from environment variables
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'bittu';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'akash@1234';
+const ADMIN_PASSWORD_HASH = bcrypt.hashSync(ADMIN_PASSWORD, 10);
 
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         
-        if (username !== 'bittu') {
+        if (username !== ADMIN_USERNAME) {
             return res.status(401).json({ message: 'Invalid username or password' });
         }
         
@@ -363,13 +365,14 @@ app.post('/api/auth/login', async (req, res) => {
         }
         
         const token = jwt.sign(
-            { username: 'bittu', role: 'admin' },
+            { username: ADMIN_USERNAME, role: 'admin' },
             process.env.JWT_SECRET || 'fallbackSecret',
             { expiresIn: '24h' }
         );
         
         res.json({ token, message: 'Login successful' });
     } catch (error) {
+        console.error('Login error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
