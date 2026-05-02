@@ -121,16 +121,26 @@ function displayProperties(properties, container) {
     });
 }
 
-// Create property card
+// Update createPropertyCard function
 function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
     
-    const imageUrl = property.image || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="250"%3E%3Crect fill="%23003d4d" width="400" height="250"/%3E%3Ctext fill="white" font-size="18" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EProperty Image%3C/text%3E%3C/svg%3E';
+    // Get images array or create single image array
+    const images = property.images && property.images.length > 0 
+        ? property.images 
+        : [property.image || property.mainImage || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="250"%3E%3Crect fill="%23003d4d" width="400" height="250"/%3E%3Ctext fill="white" font-size="18" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EProperty Image%3C/text%3E%3C/svg%3E'];
+    
+    let currentImageIndex = 0;
     
     card.innerHTML = `
-        <div class="property-image">
-            <img src="${imageUrl}" alt="${property.title}" loading="lazy">
+        <div class="property-image" style="position: relative;">
+            <img src="${images[0]}" alt="${property.title}" class="property-img" loading="lazy" style="width: 100%; height: 250px; object-fit: cover;">
+            ${images.length > 1 ? `
+                <button class="image-nav-btn prev-btn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 50%; font-size: 18px;">❮</button>
+                <button class="image-nav-btn next-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 50%; font-size: 18px;">❯</button>
+                <div class="image-counter" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;">1/${images.length}</div>
+            ` : ''}
             <span class="property-type">${property.type}</span>
         </div>
         <div class="property-details">
@@ -150,6 +160,36 @@ function createPropertyCard(property) {
             </div>
         </div>
     `;
+    
+    // Add image navigation functionality
+    if (images.length > 1) {
+        const imgElement = card.querySelector('.property-img');
+        const prevBtn = card.querySelector('.prev-btn');
+        const nextBtn = card.querySelector('.next-btn');
+        const counter = card.querySelector('.image-counter');
+        
+        const updateImage = (direction) => {
+            if (direction === 'next') {
+                currentImageIndex = (currentImageIndex + 1) % images.length;
+            } else {
+                currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+            }
+            imgElement.src = images[currentImageIndex];
+            if (counter) {
+                counter.textContent = `${currentImageIndex + 1}/${images.length}`;
+            }
+        };
+        
+        if (prevBtn) prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateImage('prev');
+        });
+        
+        if (nextBtn) nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateImage('next');
+        });
+    }
     
     return card;
 }
