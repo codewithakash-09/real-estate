@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api';  // ✅ CORRECT
+const API_BASE_URL = '/api';
 let authToken = localStorage.getItem('authToken');
 
 // Check authentication on load
@@ -71,10 +71,13 @@ function showSection(section) {
             document.getElementById('formTitle').textContent = 'Add New Property';
             document.getElementById('propertyForm').reset();
             document.getElementById('propertyId').value = '';
+            // Clear image preview
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            if (previewContainer) previewContainer.innerHTML = '';
             break;
     }
     
-    event.target.classList.add('active');
+    if (event && event.target) event.target.classList.add('active');
 }
 
 // Logout
@@ -106,7 +109,7 @@ async function loadProperties() {
                 <td>
                     <button class="btn btn-sm btn-edit" onclick="editProperty('${property._id}')">Edit</button>
                     <button class="btn btn-sm btn-delete" onclick="deleteProperty('${property._id}')">Delete</button>
-                </td>
+                 </td>
             `;
             tbody.appendChild(tr);
         });
@@ -114,169 +117,7 @@ async function loadProperties() {
         console.error('Error loading properties:', error);
     }
 }
-// Add this to your existing admin.js
 
-// Handle multiple image uploads
-async function uploadImages(files) {
-    const uploadedUrls = [];
-    
-    for (let file of files) {
-        // Check file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            alert(`${file.name} is too large. Max 5MB.`);
-            continue;
-        }
-        
-        // Check file type
-        if (!file.type.startsWith('image/')) {
-            alert(`${file.name} is not an image.`);
-            continue;
-        }
-        
-        // Convert to base64 (for demo - in production use cloud storage)
-        const reader = new FileReader();
-        const imageUrl = await new Promise((resolve) => {
-            reader.onload = (e) => resolve(e.target.result);
-            reader.readAsDataURL(file);
-        });
-        
-        uploadedUrls.push(imageUrl);
-    }
-    
-    return uploadedUrls;
-}
-
-// Update the property form submission
-document.getElementById('propertyForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const propertyId = document.getElementById('propertyId').value;
-    
-    // Handle image uploads
-    const imageFiles = document.getElementById('imageFiles')?.files;
-    let uploadedImages = [];
-    
-    if (imageFiles && imageFiles.length > 0) {
-        const submitBtn = document.getElementById('submitBtn');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Uploading Images...';
-        submitBtn.disabled = true;
-        
-        uploadedImages = await uploadImages(Array.from(imageFiles));
-        
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-    }
-    
-    // Get existing images from textarea
-    const imagesText = document.getElementById('images').value;
-    const existingImages = imagesText ? imagesText.split(',').map(url => url.trim()) : [];
-    
-    // Combine existing and newly uploaded images
-    const allImages = [...existingImages, ...uploadedImages];
-    
-    const formData = {
-        title: document.getElementById('title').value,
-        price: parseInt(document.getElementById('price').value),
-        location: document.getElementById('location').value,
-        type: document.getElementById('type').value,
-        bedrooms: parseInt(document.getElementById('bedrooms').value),
-        bathrooms: parseInt(document.getElementById('bathrooms').value),
-        area: parseInt(document.getElementById('area').value),
-        description: document.getElementById('description').value,
-        status: document.getElementById('status').value,
-        mainImage: document.getElementById('mainImage').value || (allImages[0] || ''),
-        images: allImages
-    };
-    
-    try {
-        const url = propertyId 
-            ? `${API_BASE_URL}/properties/${propertyId}`
-            : `${API_BASE_URL}/properties`;
-        
-        const method = propertyId ? 'PUT' : 'POST';
-        
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify(formData)
-        });
-        
-        if (response.ok) {
-            alert(propertyId ? 'Property updated successfully' : 'Property added successfully');
-            showSection('properties');
-            loadProperties();
-        } else {
-            const error = await response.json();
-            alert(error.message || 'Failed to save property');
-        }
-    } catch (error) {
-        console.error('Error saving property:', error);
-        alert('Error saving property');
-    }
-});
-
-// Edit property (update to load images)
-async function editProperty(id) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/properties/${id}`);
-        const property = await response.json();
-        
-        document.getElementById('propertyId').value = property._id;
-        document.getElementById('title').value = property.title;
-        document.getElementById('price').value = property.price;
-        document.getElementById('location').value = property.location;
-        document.getElementById('type').value = property.type;
-        document.getElementById('bedrooms').value = property.bedrooms;
-        document.getElementById('bathrooms').value = property.bathrooms;
-        document.getElementById('area').value = property.area;
-        document.getElementById('description').value = property.description;
-        document.getElementById('status').value = property.status;
-        document.getElementById('mainImage').value = property.mainImage || '';
-        document.getElementById('images').value = property.images ? property.images.join(', ') : '';
-        
-        document.getElementById('formTitle').textContent = 'Edit Property';
-        document.getElementById('submitBtn').textContent = 'Update Property';
-        
-        showSection('addProperty');
-    } catch (error) {
-        console.error('Error loading property:', error);
-        alert('Failed to load property details');
-    }
-}
-// Add image preview functionality
-document.getElementById('imageFiles')?.addEventListener('change', function(e) {
-    const files = Array.from(e.target.files);
-    const previewContainer = document.getElementById('imagePreviewContainer') || createPreviewContainer();
-    
-    previewContainer.innerHTML = '';
-    
-    files.forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const previewDiv = document.createElement('div');
-            previewDiv.className = 'image-preview-item';
-            previewDiv.innerHTML = `
-                <img src="${e.target.result}" alt="Preview ${index}">
-                <button class="remove-image-btn" data-index="${index}">×</button>
-            `;
-            previewContainer.appendChild(previewDiv);
-        };
-        reader.readAsDataURL(file);
-    });
-});
-
-function createPreviewContainer() {
-    const container = document.createElement('div');
-    container.id = 'imagePreviewContainer';
-    container.className = 'image-preview-grid';
-    const formGroup = document.querySelector('#imageFiles').parentElement;
-    formGroup.appendChild(container);
-    return container;
-}
 // Load leads
 async function loadLeads() {
     try {
@@ -299,7 +140,7 @@ async function loadLeads() {
                 <td><span class="status-badge status-${lead.status}">${lead.status}</span></td>
                 <td>
                     <button class="btn btn-sm btn-status" onclick="updateLeadStatus('${lead._id}', 'contacted')">Mark Contacted</button>
-                </td>
+                 </td>
             `;
             tbody.appendChild(tr);
         });
@@ -310,55 +151,6 @@ async function loadLeads() {
         document.getElementById('contactedLeads').textContent = leads.filter(l => l.status === 'contacted').length;
     } catch (error) {
         console.error('Error loading leads:', error);
-    }
-}
-
-// Edit property
-async function editProperty(id) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/properties/${id}`);
-        const property = await response.json();
-        
-        document.getElementById('propertyId').value = property._id;
-        document.getElementById('title').value = property.title;
-        document.getElementById('price').value = property.price;
-        document.getElementById('location').value = property.location;
-        document.getElementById('type').value = property.type;
-        document.getElementById('bedrooms').value = property.bedrooms;
-        document.getElementById('bathrooms').value = property.bathrooms;
-        document.getElementById('area').value = property.area;
-        document.getElementById('description').value = property.description;
-        document.getElementById('status').value = property.status;
-        
-        document.getElementById('formTitle').textContent = 'Edit Property';
-        document.getElementById('submitBtn').textContent = 'Update Property';
-        
-        showSection('addProperty');
-    } catch (error) {
-        console.error('Error loading property:', error);
-        alert('Failed to load property details');
-    }
-}
-
-// Delete property
-async function deleteProperty(id) {
-    if (!confirm('Are you sure you want to delete this property?')) return;
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/properties/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        
-        if (response.ok) {
-            alert('Property deleted successfully');
-            loadProperties();
-        } else {
-            alert('Failed to delete property');
-        }
-    } catch (error) {
-        console.error('Error deleting property:', error);
-        alert('Error deleting property');
     }
 }
 
@@ -384,11 +176,111 @@ async function updateLeadStatus(id, status) {
     }
 }
 
-// Property form submission
+// Delete property
+async function deleteProperty(id) {
+    if (!confirm('Are you sure you want to delete this property?')) return;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/properties/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (response.ok) {
+            alert('Property deleted successfully');
+            loadProperties();
+        } else {
+            alert('Failed to delete property');
+        }
+    } catch (error) {
+        console.error('Error deleting property:', error);
+        alert('Error deleting property');
+    }
+}
+
+// ============= IMAGE UPLOAD FUNCTIONS =============
+
+async function uploadImages(files) {
+    const uploadedUrls = [];
+    
+    for (let file of files) {
+        if (file.size > 5 * 1024 * 1024) {
+            alert(`${file.name} is too large. Max 5MB.`);
+            continue;
+        }
+        
+        if (!file.type.startsWith('image/')) {
+            alert(`${file.name} is not an image.`);
+            continue;
+        }
+        
+        const imageUrl = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(file);
+        });
+        
+        uploadedUrls.push(imageUrl);
+    }
+    
+    return uploadedUrls;
+}
+
+function createPreviewContainer() {
+    let container = document.getElementById('imagePreviewContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'imagePreviewContainer';
+        container.className = 'image-preview-grid';
+        const formGroup = document.querySelector('#imageFiles').parentElement;
+        formGroup.appendChild(container);
+    }
+    return container;
+}
+
+document.getElementById('imageFiles')?.addEventListener('change', function(e) {
+    const files = Array.from(e.target.files);
+    const previewContainer = createPreviewContainer();
+    
+    previewContainer.innerHTML = '';
+    
+    files.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const previewDiv = document.createElement('div');
+            previewDiv.className = 'image-preview-item';
+            previewDiv.innerHTML = `
+                <img src="${e.target.result}" alt="Preview ${index}">
+                <button class="remove-image-btn" data-index="${index}">×</button>
+            `;
+            previewContainer.appendChild(previewDiv);
+        };
+        reader.readAsDataURL(file);
+    });
+});
+
+// ============= PROPERTY FORM SUBMISSION =============
 document.getElementById('propertyForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const propertyId = document.getElementById('propertyId').value;
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.textContent;
+    
+    const imageFiles = document.getElementById('imageFiles')?.files;
+    let uploadedImages = [];
+    
+    if (imageFiles && imageFiles.length > 0) {
+        submitBtn.textContent = 'Uploading Images...';
+        submitBtn.disabled = true;
+        uploadedImages = await uploadImages(Array.from(imageFiles));
+    }
+    
+    const imagesText = document.getElementById('images').value;
+    const existingImages = imagesText ? imagesText.split(',').map(url => url.trim()).filter(url => url) : [];
+    const allImages = [...existingImages, ...uploadedImages];
+    const mainImage = document.getElementById('mainImage').value || (allImages[0] || '');
+    
     const formData = {
         title: document.getElementById('title').value,
         price: parseInt(document.getElementById('price').value),
@@ -398,8 +290,17 @@ document.getElementById('propertyForm')?.addEventListener('submit', async (e) =>
         bathrooms: parseInt(document.getElementById('bathrooms').value),
         area: parseInt(document.getElementById('area').value),
         description: document.getElementById('description').value,
-        status: document.getElementById('status').value
+        status: document.getElementById('status').value,
+        mainImage: mainImage,
+        images: allImages
     };
+    
+    if (!formData.title || !formData.price || !formData.location || !formData.type) {
+        alert('Please fill in all required fields');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return;
+    }
     
     try {
         const url = propertyId 
@@ -407,6 +308,9 @@ document.getElementById('propertyForm')?.addEventListener('submit', async (e) =>
             : `${API_BASE_URL}/properties`;
         
         const method = propertyId ? 'PUT' : 'POST';
+        
+        submitBtn.textContent = 'Saving...';
+        submitBtn.disabled = true;
         
         const response = await fetch(url, {
             method: method,
@@ -418,15 +322,68 @@ document.getElementById('propertyForm')?.addEventListener('submit', async (e) =>
         });
         
         if (response.ok) {
-            alert(propertyId ? 'Property updated successfully' : 'Property added successfully');
+            alert(propertyId ? 'Property updated successfully!' : 'Property added successfully!');
             showSection('properties');
             loadProperties();
+            document.getElementById('propertyForm').reset();
+            document.getElementById('propertyId').value = '';
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            if (previewContainer) previewContainer.innerHTML = '';
         } else {
             const error = await response.json();
             alert(error.message || 'Failed to save property');
         }
     } catch (error) {
         console.error('Error saving property:', error);
-        alert('Error saving property');
+        alert('Error saving property. Please check your connection.');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
 });
+
+// ============= EDIT PROPERTY (ONLY ONE VERSION) =============
+async function editProperty(id) {
+    try {
+        console.log('Editing property:', id);
+        const response = await fetch(`${API_BASE_URL}/properties/${id}`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch property');
+        }
+        
+        const property = await response.json();
+        console.log('Property data:', property);
+        
+        // Fill all form fields
+        document.getElementById('propertyId').value = property._id;
+        document.getElementById('title').value = property.title || '';
+        document.getElementById('price').value = property.price || '';
+        document.getElementById('location').value = property.location || '';
+        document.getElementById('type').value = property.type || '';
+        document.getElementById('bedrooms').value = property.bedrooms || '';
+        document.getElementById('bathrooms').value = property.bathrooms || '';
+        document.getElementById('area').value = property.area || '';
+        document.getElementById('description').value = property.description || '';
+        document.getElementById('status').value = property.status || 'Available';
+        
+        // IMPORTANT: Load image fields
+        document.getElementById('mainImage').value = property.mainImage || '';
+        document.getElementById('images').value = property.images ? property.images.join(', ') : '';
+        
+        // Clear file input and preview
+        document.getElementById('imageFiles').value = '';
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        if (previewContainer) previewContainer.innerHTML = '';
+        
+        document.getElementById('formTitle').textContent = 'Edit Property';
+        document.getElementById('submitBtn').textContent = 'Update Property';
+        
+        // Switch to add property section
+        showSection('addProperty');
+        
+    } catch (error) {
+        console.error('Error loading property for edit:', error);
+        alert('Failed to load property details. Please try again.');
+    }
+}
