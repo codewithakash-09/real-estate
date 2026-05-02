@@ -35,21 +35,23 @@ async function uploadToImgBB(file) {
     }
 }
 
-// ============= PROCESS IMAGES (URLs + Files) =============
+// ============= PROCESS IMAGES (URLs + Files) - FIXED =============
 async function processImages(imageUrlsText, imageFiles) {
     const processedUrls = [];
     
-    // 1. Process URL-based images from textarea
+    // 1. Process URL-based images from textarea - FIXED
     if (imageUrlsText && imageUrlsText.trim()) {
-        const urls = imageUrlsText.split(',').map(url => url.trim()).filter(url => url);
+        // Split by comma, new line, or space
+        const urls = imageUrlsText.split(/[,\n\s]+/).map(url => url.trim()).filter(url => url && url.startsWith('http'));
         for (const url of urls) {
             if (url.startsWith('http://') || url.startsWith('https://')) {
                 processedUrls.push(url);
+                console.log('Added image URL:', url);
             }
         }
     }
     
-    // 2. Upload files to ImgBB
+    // 2. Upload files to ImgBB (only if API key is configured)
     if (imageFiles && imageFiles.length > 0) {
         for (let i = 0; i < imageFiles.length; i++) {
             const file = imageFiles[i];
@@ -66,18 +68,26 @@ async function processImages(imageUrlsText, imageFiles) {
                 continue;
             }
             
-            const result = await uploadToImgBB(file);
-            if (result.success) {
-                processedUrls.push(result.url);
+            // Only try to upload if API key is set
+            if (IMGBB_API_KEY && IMGBB_API_KEY !== 'YOUR_API_KEY_HERE') {
+                const result = await uploadToImgBB(file);
+                if (result.success) {
+                    processedUrls.push(result.url);
+                } else {
+                    alert(`Failed to upload ${file.name}: ${result.error}`);
+                }
             } else {
-                alert(`Failed to upload ${file.name}: ${result.error}`);
+                // If no API key, use local preview (for testing)
+                const localUrl = URL.createObjectURL(file);
+                processedUrls.push(localUrl);
+                console.warn('ImgBB API key not set. Using local preview only.');
             }
         }
     }
     
+    console.log('Processed URLs:', processedUrls);
     return processedUrls;
 }
-
 // ============= CHECK AUTHENTICATION =============
 document.addEventListener('DOMContentLoaded', () => {
     if (authToken) {
@@ -380,8 +390,7 @@ async function editProperty(id) {
         alert('Failed to load property details. Please try again.');
     }
 }
-
-// ============= PROPERTY FORM SUBMISSION (WITH IMGBB UPLOAD) =============
+// ============= PROPERTY FORM SUBMISSION - FIXED =============
 document.getElementById('propertyForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -389,16 +398,25 @@ document.getElementById('propertyForm')?.addEventListener('submit', async (e) =>
     const submitBtn = document.getElementById('submitBtn');
     const originalText = submitBtn.textContent;
     
-    // Get images from both sources
+    // Get images from both sources - FIXED to handle URLs properly
     const imagesText = document.getElementById('images').value;
+    const mainImageUrl = document.getElementById('mainImage').value;
     const imageFiles = document.getElementById('imageFiles').files;
     
     submitBtn.textContent = 'Processing images...';
     submitBtn.disabled = true;
     
-    // Process all images (both URLs and files) using ImgBB
+    // Process all images (both URLs and files)
     const allImageUrls = await processImages(imagesText, imageFiles);
-    const mainImage = document.getElementById('mainImage').value || (allImageUrls[0] || '');
+    
+    // Use mainImage from input, or first image from gallery, or placeholder
+    let finalMainImage = mainImageUrl;
+    if (!finalMainImage && allImageUrls.length > 0) {
+        finalMainImage = allImageUrls[0];
+    }
+    if (!finalMainImage) {
+        finalMainImage = 'https://via.placeholder.com/800x600?text=Property+Image';
+    }
     
     const formData = {
         title: document.getElementById('title').value,
@@ -410,9 +428,12 @@ document.getElementById('propertyForm')?.addEventListener('submit', async (e) =>
         area: parseInt(document.getElementById('area').value),
         description: document.getElementById('description').value,
         status: document.getElementById('status').value,
-        mainImage: mainImage,
+        mainImage: finalMainImage,
         images: allImageUrls
     };
+    
+    console.log('Submitting property with images:', formData.images);
+    console.log('Main image:', formData.mainImage);
     
     // Validate required fields
     if (!formData.title || !formData.price || !formData.location || !formData.type) {
@@ -441,12 +462,16 @@ document.getElementById('propertyForm')?.addEventListener('submit', async (e) =>
         });
         
         if (response.ok) {
+            const result = await response.json();
+            console.log('Property saved successfully:', result);
             alert(propertyId ? 'Property updated successfully!' : 'Property added successfully!');
             
             // Reset form
             document.getElementById('propertyForm').reset();
             document.getElementById('propertyId').value = '';
             document.getElementById('imageFiles').value = '';
+            document.getElementById('images').value = '';
+            document.getElementById('mainImage').value = '';
             
             // Clear image preview
             const previewContainer = document.getElementById('imagePreviewContainer');
@@ -462,6 +487,7 @@ document.getElementById('propertyForm')?.addEventListener('submit', async (e) =>
             loadProperties();
         } else {
             const error = await response.json();
+            console.error('Server error:', error);
             alert(error.message || 'Failed to save property');
         }
     } catch (error) {
