@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = '/api';
 let authToken = localStorage.getItem('authToken');
 
 // Check authentication on load
@@ -41,6 +41,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     }
 });
 
+// Rest of your code remains the same...
 // Show dashboard
 function showDashboard() {
     document.getElementById('loginScreen').style.display = 'none';
