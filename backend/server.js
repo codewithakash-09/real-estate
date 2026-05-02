@@ -10,10 +10,11 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
+let dbConnection = false; // ADD THIS LINE - FIXES dbConnection error
 
 // Security Middleware
 app.use(helmet({
-    contentSecurityPolicy: false, // Disable for development, enable in production with proper config
+    contentSecurityPolicy: false,
 }));
 
 // Compression
@@ -21,22 +22,22 @@ app.use(compression());
 
 // Rate limiting
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    windowMs: 15 * 60 * 1000,
+    max: 100,
     message: { error: 'Too many requests, please try again later.' }
 });
 app.use('/api/', limiter);
 
-// CORS configuration - Fixed from wildcard
-// const corsOptions = {
-//     origin: process.env.NODE_ENV === 'production' 
-//         ? ['https://yourdomain.com', 'https://www.yourdomain.com']
-//         : ['http://localhost:3000', 'http://localhost:5000', 'http://127.0.0.1:5500'],
-//     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//     allowedHeaders: ['Content-Type', 'Authorization'],
-//     credentials: true
-// };
-// app.use(cors(corsOptions));
+// CORS configuration - UNCOMMENT AND FIX THIS
+const corsOptions = {
+    origin: process.env.NODE_ENV === 'production' 
+        ? ['https://yourdomain.com', 'https://www.yourdomain.com']
+        : ['http://localhost:3000', 'http://localhost:5000', 'http://127.0.0.1:5500', 'http://localhost:5500'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+};
+app.use(cors(corsOptions));
 
 // Body parser with size limits
 app.use(express.json({ limit: '10mb' }));
@@ -50,21 +51,16 @@ app.use(express.static(frontendPath));
 app.use('/admin', express.static(path.join(frontendPath, 'admin')));
 
 // ============= MONGODB CONNECTION =============
-
-// ============= MONGODB CONNECTION WITH BETTER ERROR HANDLING =============
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
     console.error('❌ MONGODB_URI is not defined in environment variables!');
     console.log('⚠️  Using in-memory fallback mode');
-    console.log('💡 To use MongoDB, add MONGODB_URI to your .env file');
 } else {
-    // Validate MongoDB URI format
     if (!MONGODB_URI.startsWith('mongodb://') && !MONGODB_URI.startsWith('mongodb+srv://')) {
-        console.error('❌ Invalid MONGODB_URI format. Should start with mongodb:// or mongodb+srv://');
+        console.error('❌ Invalid MONGODB_URI format');
         console.log('⚠️  Using in-memory fallback mode');
     } else {
-        // Try to connect
         mongoose.connect(MONGODB_URI, {
             serverSelectionTimeoutMS: 5000,
             socketTimeoutMS: 45000,
@@ -77,14 +73,11 @@ if (!MONGODB_URI) {
         .catch(err => {
             console.error('❌ MongoDB Connection Error:', err.message);
             console.log('⚠️  Continuing with in-memory fallback...');
-            console.log('💡 Common fixes:');
-            console.log('   1. Check your MongoDB Atlas username/password');
-            console.log('   2. Whitelist your IP address in MongoDB Atlas Network Access');
-            console.log('   3. Make sure the cluster is running');
             dbConnection = false;
         });
     }
 }
+
 // ============= SCHEMAS =============
 const propertySchema = new mongoose.Schema({
     title: { type: String, required: true },
@@ -130,11 +123,7 @@ let properties = [
         area: 850,
         description: 'Beautiful GDA flat in prime location of Vaishali, near metro station',
         status: 'Available',
-        images: [
-            'https://via.placeholder.com/800x600?text=Image+1',
-            'https://via.placeholder.com/800x600?text=Image+2',
-            'https://via.placeholder.com/800x600?text=Image+3'
-        ],
+        images: ['https://via.placeholder.com/800x600?text=Image+1'],
         mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
         createdAt: new Date().toISOString()
     },
@@ -149,11 +138,7 @@ let properties = [
         area: 1450,
         description: 'Luxurious builder apartment in Indirapuram with modern amenities',
         status: 'Available',
-        images: [
-            'https://via.placeholder.com/800x600?text=Image+1',
-            'https://via.placeholder.com/800x600?text=Image+2',
-            'https://via.placeholder.com/800x600?text=Image+3'
-        ],
+        images: ['https://via.placeholder.com/800x600?text=Image+1'],
         mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
         createdAt: new Date().toISOString()
     },
@@ -168,11 +153,7 @@ let properties = [
         area: 500,
         description: 'Affordable GDA flat in Raj Nagar Extension',
         status: 'Available',
-        images: [
-            'https://via.placeholder.com/800x600?text=Image+1',
-            'https://via.placeholder.com/800x600?text=Image+2',
-            'https://via.placeholder.com/800x600?text=Image+3'
-        ],
+        images: ['https://via.placeholder.com/800x600?text=Image+1'],
         mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
         createdAt: new Date().toISOString()
     },
@@ -187,11 +168,7 @@ let properties = [
         area: 900,
         description: 'Well-maintained builder floor near Greater Noida',
         status: 'Available',
-        images: [
-            'https://via.placeholder.com/800x600?text=Image+1',
-            'https://via.placeholder.com/800x600?text=Image+2',
-            'https://via.placeholder.com/800x600?text=Image+3'
-        ],
+        images: ['https://via.placeholder.com/800x600?text=Image+1'],
         mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
         createdAt: new Date().toISOString()
     },
@@ -206,11 +183,7 @@ let properties = [
         area: 1800,
         description: 'Spacious independent house with parking',
         status: 'Available',
-        images: [
-            'https://via.placeholder.com/800x600?text=Image+1',
-            'https://via.placeholder.com/800x600?text=Image+2',
-            'https://via.placeholder.com/800x600?text=Image+3'
-        ],
+        images: ['https://via.placeholder.com/800x600?text=Image+1'],
         mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
         createdAt: new Date().toISOString()
     },
@@ -225,11 +198,7 @@ let properties = [
         area: 750,
         description: 'Budget-friendly GDA flat on NH-24',
         status: 'Available',
-        images: [
-            'https://via.placeholder.com/800x600?text=Image+1',
-            'https://via.placeholder.com/800x600?text=Image+2',
-            'https://via.placeholder.com/800x600?text=Image+3'
-        ],
+        images: ['https://via.placeholder.com/800x600?text=Image+1'],
         mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
         createdAt: new Date().toISOString()
     }
@@ -254,7 +223,9 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-// ============= PROPERTY ROUTES =============
+// ============= PROPERTY ROUTES - ADD THESE BACK =============
+
+// GET all properties
 app.get('/api/properties', async (req, res) => {
     try {
         const { location, type, minPrice, maxPrice } = req.query;
@@ -284,6 +255,7 @@ app.get('/api/properties', async (req, res) => {
     }
 });
 
+// GET single property
 app.get('/api/properties/:id', async (req, res) => {
     try {
         if (Property && mongoose.connection.readyState === 1) {
@@ -301,11 +273,19 @@ app.get('/api/properties/:id', async (req, res) => {
     }
 });
 
+// POST create property - ONLY ONE, IN THE RIGHT PLACE
 app.post('/api/properties', authMiddleware, async (req, res) => {
     try {
+        console.log('📝 Received property data:', {
+            title: req.body.title,
+            mainImage: req.body.mainImage ? req.body.mainImage.substring(0, 50) + '...' : 'none',
+            imagesCount: req.body.images?.length || 0
+        });
+        
         if (Property && mongoose.connection.readyState === 1) {
             const property = new Property(req.body);
             await property.save();
+            console.log('✅ Property saved to MongoDB');
             return res.status(201).json(property);
         }
         
@@ -315,31 +295,38 @@ app.post('/api/properties', authMiddleware, async (req, res) => {
             createdAt: new Date().toISOString()
         };
         properties.push(newProperty);
+        console.log('💾 Property saved in-memory');
         res.status(201).json(newProperty);
     } catch (error) {
-        console.error('Error creating property:', error);
+        console.error('❌ Error creating property:', error);
         res.status(400).json({ message: error.message });
     }
 });
 
+// PUT update property
 app.put('/api/properties/:id', authMiddleware, async (req, res) => {
     try {
+        console.log('📝 Updating property:', req.params.id);
+        
         if (Property && mongoose.connection.readyState === 1) {
             const property = await Property.findByIdAndUpdate(req.params.id, req.body, { new: true });
             if (!property) return res.status(404).json({ message: 'Property not found' });
+            console.log('✅ Property updated in MongoDB');
             return res.json(property);
         }
         
         const index = properties.findIndex(p => p._id === req.params.id);
         if (index === -1) return res.status(404).json({ message: 'Property not found' });
         properties[index] = { ...properties[index], ...req.body };
+        console.log('💾 Property updated in-memory');
         res.json(properties[index]);
     } catch (error) {
-        console.error('Error updating property:', error);
+        console.error('❌ Error updating property:', error);
         res.status(400).json({ message: error.message });
     }
 });
 
+// DELETE property
 app.delete('/api/properties/:id', authMiddleware, async (req, res) => {
     try {
         if (Property && mongoose.connection.readyState === 1) {
@@ -429,17 +416,14 @@ app.put('/api/leads/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// ============= AUTH ROUTES (FIXED - No hardcoded credentials) =============
+// ============= AUTH ROUTES =============
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-// Validate environment variables on startup
 if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {
-    console.error('❌ CRITICAL: ADMIN_USERNAME or ADMIN_PASSWORD not set in environment variables!');
-    console.log('Please set these in your .env file');
+    console.error('❌ CRITICAL: ADMIN_USERNAME or ADMIN_PASSWORD not set!');
 }
 
-// Hash password only once at startup
 let ADMIN_PASSWORD_HASH;
 if (ADMIN_PASSWORD) {
     ADMIN_PASSWORD_HASH = bcrypt.hashSync(ADMIN_PASSWORD, 10);
@@ -449,9 +433,7 @@ app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         
-        // Check if admin credentials are configured
         if (!ADMIN_USERNAME || !ADMIN_PASSWORD_HASH) {
-            console.error('Admin credentials not configured');
             return res.status(500).json({ message: 'Server configuration error' });
         }
         
@@ -477,7 +459,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-// ============= HEALTH CHECK (ENHANCED) =============
+// ============= HEALTH CHECK =============
 app.get('/api/health', async (req, res) => {
     let dbStatus = 'disconnected';
     let dbResponding = false;
@@ -504,7 +486,7 @@ app.get('/api/health', async (req, res) => {
     });
 });
 
-// ============= ROBOTS.TXT ENDPOINT =============
+// ============= ROBOTS.TXT & SITEMAP =============
 app.get('/robots.txt', (req, res) => {
     const robotsTxt = `User-agent: *
 Allow: /
@@ -516,7 +498,6 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
     res.send(robotsTxt);
 });
 
-// ============= SITEMAP GENERATOR =============
 app.get('/sitemap.xml', async (req, res) => {
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     const currentDate = new Date().toISOString().split('T')[0];
@@ -531,7 +512,6 @@ app.get('/sitemap.xml', async (req, res) => {
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
     
-    // Main pages
     const pages = ['', 'about', 'properties', 'contact'];
     pages.forEach(page => {
         sitemap += `
@@ -543,7 +523,6 @@ app.get('/sitemap.xml', async (req, res) => {
   </url>`;
     });
     
-    // Property pages
     propertiesList.forEach(property => {
         sitemap += `
   <url>
@@ -586,29 +565,17 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`📞 Leads API: http://localhost:${PORT}/api/leads`);
     console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth/login`);
     console.log(`🏥 Health: http://localhost:${PORT}/api/health`);
-    console.log(`🤖 Robots.txt: http://localhost:${PORT}/robots.txt`);
-    console.log(`🗺️  Sitemap: http://localhost:${PORT}/sitemap.xml`);
     console.log('=================================');
     console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
     
     if (mongoose.connection.readyState === 1) {
         console.log('💾 Using MongoDB Database ✅');
-        console.log(`📁 Database: ${mongoose.connection.name}`);
     } else {
         console.log('💾 Using In-Memory Database ⚠️');
-        console.log('⚠️  Set MONGODB_URI in .env for persistent storage');
     }
     
     if (ADMIN_USERNAME && ADMIN_PASSWORD) {
         console.log('✅ Admin credentials configured');
-    } else {
-        console.log('❌ Admin credentials NOT configured! Set ADMIN_USERNAME and ADMIN_PASSWORD in .env');
-    }
-    
-    if (process.env.JWT_SECRET && process.env.JWT_SECRET !== 'fallbackSecret') {
-        console.log('✅ JWT secret configured');
-    } else {
-        console.log('⚠️  Using fallback JWT secret - Change this in production!');
     }
     console.log('=================================');
 });
@@ -618,9 +585,13 @@ process.on('SIGTERM', () => {
     console.log('SIGTERM signal received: closing HTTP server');
     server.close(() => {
         console.log('HTTP server closed');
-        mongoose.connection.close(false, () => {
-            console.log('MongoDB connection closed');
+        if (mongoose.connection.readyState === 1) {
+            mongoose.connection.close(false, () => {
+                console.log('MongoDB connection closed');
+                process.exit(0);
+            });
+        } else {
             process.exit(0);
-        });
+        }
     });
 });
