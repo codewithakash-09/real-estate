@@ -154,6 +154,23 @@
                             <label>Description</label>
                             <textarea id="description" rows="4" required></textarea>
                         </div>
+                        <!-- Add this inside the property form, after the description field -->
+<div class="form-group">
+    <label>Main Image URL (Cover Photo)</label>
+    <input type="text" id="mainImage" placeholder="https://example.com/main-image.jpg">
+</div>
+
+<div class="form-group">
+    <label>Additional Images (Enter URLs separated by commas)</label>
+    <textarea id="images" rows="3" placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg, https://example.com/image3.jpg"></textarea>
+    <small>Enter image URLs separated by commas. Max 10 images recommended.</small>
+</div>
+
+<div class="form-group">
+    <label>Upload Images from Computer</label>
+    <input type="file" id="imageFiles" multiple accept="image/*">
+    <small>You can select multiple images at once (JPG, PNG, WEBP)</small>
+</div>
                         <div class="form-group">
                             <label>Status</label>
                             <select id="status">
