@@ -125,7 +125,7 @@ function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
     
-    // Get all images
+    // Get all images - ENSURE MULTIPLE IMAGES FOR BUTTONS TO SHOW
     let allImages = [];
     
     if (property.images && Array.isArray(property.images) && property.images.length > 0) {
@@ -155,8 +155,8 @@ function createPropertyCard(property) {
     let dotsHtml = '';
     if (hasMultipleImages) {
         dotsHtml = `
-            <div class="image-dots" style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10;">
-                ${allImages.map((_, idx) => `<span class="dot ${idx === 0 ? 'active' : ''}" data-index="${idx}" style="width: 8px; height: 8px; border-radius: 50%; background: ${idx === 0 ? 'white' : 'rgba(255,255,255,0.5)'}; cursor: pointer; transition: all 0.3s ease;"></span>`).join('')}
+            <div class="image-dots">
+                ${allImages.map((_, idx) => `<span class="dot ${idx === 0 ? 'active' : ''}" data-index="${idx}"></span>`).join('')}
             </div>
         `;
     }
@@ -165,10 +165,10 @@ function createPropertyCard(property) {
     let thumbnailsHtml = '';
     if (hasMultipleImages) {
         thumbnailsHtml = `
-            <div class="image-thumbnails" style="display: flex; gap: 8px; padding: 10px; background: rgba(0,0,0,0.05); overflow-x: auto;">
+            <div class="image-thumbnails">
                 ${allImages.map((img, idx) => `
-                    <div class="thumbnail ${idx === 0 ? 'active' : ''}" data-index="${idx}" style="width: 60px; height: 60px; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid ${idx === 0 ? '#4da6ff' : 'transparent'}; flex-shrink: 0;">
-                        <img src="${img}" alt="Thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div class="thumbnail ${idx === 0 ? 'active' : ''}" data-index="${idx}">
+                        <img src="${img}" alt="Thumbnail">
                     </div>
                 `).join('')}
             </div>
@@ -176,22 +176,21 @@ function createPropertyCard(property) {
     }
     
     card.innerHTML = `
-        <div class="property-image" style="position: relative; overflow: hidden; height: 280px; background: #f0f0f0;">
+        <div class="property-image">
             <img src="${displayImage}" 
                  alt="${property.title}" 
                  class="property-img" 
                  loading="lazy" 
-                 style="width: 100%; height: 280px; object-fit: cover;" 
                  onerror="this.onerror=null; this.src='https://via.placeholder.com/800x600?text=Image+Load+Failed'; this.style.objectFit='contain';">
             
             ${hasMultipleImages ? `
-                <button class="image-nav-btn prev-btn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; padding: 10px 14px; cursor: pointer; border-radius: 50%; font-size: 18px; z-index: 10; transition: all 0.3s ease;">❮</button>
-                <button class="image-nav-btn next-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; padding: 10px 14px; cursor: pointer; border-radius: 50%; font-size: 18px; z-index: 10; transition: all 0.3s ease;">❯</button>
-                <div class="image-counter" style="position: absolute; bottom: 15px; right: 15px; background: rgba(0,0,0,0.7); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; z-index: 10; font-weight: 500;">1/${allImages.length}</div>
+                <button class="image-nav-btn prev-btn">❮</button>
+                <button class="image-nav-btn next-btn">❯</button>
+                <div class="image-counter">1/${allImages.length}</div>
                 ${dotsHtml}
             ` : ''}
             
-            <span class="property-type" style="position: absolute; top: 15px; right: 15px; background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; z-index: 10;">${property.type}</span>
+            <span class="property-type">${property.type}</span>
         </div>
         ${thumbnailsHtml}
         <div class="property-details">
@@ -214,8 +213,11 @@ function createPropertyCard(property) {
     
     // Add event listeners if multiple images
     if (hasMultipleImages) {
-        // Previous button
         const prevBtn = card.querySelector('.prev-btn');
+        const nextBtn = card.querySelector('.next-btn');
+        const thumbnails = card.querySelectorAll('.thumbnail');
+        const dots = card.querySelectorAll('.dot');
+        
         if (prevBtn) {
             prevBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -223,8 +225,6 @@ function createPropertyCard(property) {
             });
         }
         
-        // Next button
-        const nextBtn = card.querySelector('.next-btn');
         if (nextBtn) {
             nextBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -232,8 +232,6 @@ function createPropertyCard(property) {
             });
         }
         
-        // Thumbnails
-        const thumbnails = card.querySelectorAll('.thumbnail');
         thumbnails.forEach((thumb, idx) => {
             thumb.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -241,8 +239,6 @@ function createPropertyCard(property) {
             });
         });
         
-        // Dots
-        const dots = card.querySelectorAll('.dot');
         dots.forEach((dot, idx) => {
             dot.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -291,20 +287,14 @@ function updateCardImage(card, newIndex) {
     const counter = card.querySelector('.image-counter');
     if (counter) {
         counter.textContent = `${newIndex + 1}/${totalImages}`;
-        counter.style.transform = 'scale(1.2)';
-        setTimeout(() => {
-            counter.style.transform = 'scale(1)';
-        }, 200);
     }
     
     // Update dots
     const dots = card.querySelectorAll('.dot');
     dots.forEach((dot, idx) => {
         if (idx === newIndex) {
-            dot.style.background = 'white';
             dot.classList.add('active');
         } else {
-            dot.style.background = 'rgba(255,255,255,0.5)';
             dot.classList.remove('active');
         }
     });
@@ -314,10 +304,8 @@ function updateCardImage(card, newIndex) {
     thumbnails.forEach((thumb, idx) => {
         if (idx === newIndex) {
             thumb.classList.add('active');
-            thumb.style.borderColor = '#4da6ff';
         } else {
             thumb.classList.remove('active');
-            thumb.style.borderColor = 'transparent';
         }
     });
     
