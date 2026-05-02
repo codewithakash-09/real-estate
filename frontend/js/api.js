@@ -1,6 +1,6 @@
 // API Configuration
-const API_BASE_URL = 'http://localhost:5000/api';
-
+const API_BASE_URL = window.location.origin + '/api';
+let authToken = localStorage.getItem('authToken');
 // Fetch all properties with filters
 async function fetchProperties(filters = {}) {
     try {
@@ -38,7 +38,7 @@ async function submitLead(leadData) {
         const response = await fetch(`${API_BASE_URL}/leads`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(leadData)
         });
