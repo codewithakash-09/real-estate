@@ -122,26 +122,49 @@ function displayProperties(properties, container) {
 }
 
 // Update createPropertyCard function
+// Update createPropertyCard function - FIXED for external URLs
 function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
     
-    // Get images array or create single image array
-    const images = property.images && property.images.length > 0 
-        ? property.images 
-        : [property.image || property.mainImage || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="250"%3E%3Crect fill="%23003d4d" width="400" height="250"/%3E%3Ctext fill="white" font-size="18" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EProperty Image%3C/text%3E%3C/svg%3E'];
+    // Get images array - FIXED to handle different formats
+    let images = [];
+    
+    // Check if property has images array
+    if (property.images && Array.isArray(property.images) && property.images.length > 0) {
+        images = property.images;
+    } 
+    // Check if property has mainImage
+    else if (property.mainImage && property.mainImage !== '') {
+        images = [property.mainImage];
+    }
+    // Check if property has single image field
+    else if (property.image && property.image !== '') {
+        images = [property.image];
+    }
+    // Fallback placeholder
+    else {
+        images = ['https://via.placeholder.com/800x600?text=Property+Image'];
+    }
+    
+    // Filter out any empty or invalid URLs
+    images = images.filter(img => img && img.trim() !== '');
+    
+    if (images.length === 0) {
+        images = ['https://via.placeholder.com/800x600?text=Property+Image'];
+    }
     
     let currentImageIndex = 0;
     
     card.innerHTML = `
-        <div class="property-image" style="position: relative;">
-            <img src="${images[0]}" alt="${property.title}" class="property-img" loading="lazy" style="width: 100%; height: 250px; object-fit: cover;">
+        <div class="property-image" style="position: relative; overflow: hidden; height: 250px;">
+            <img src="${images[0]}" alt="${property.title}" class="property-img" loading="lazy" style="width: 100%; height: 250px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/800x600?text=Image+Not+Found'">
             ${images.length > 1 ? `
-                <button class="image-nav-btn prev-btn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 50%; font-size: 18px;">❮</button>
-                <button class="image-nav-btn next-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 50%; font-size: 18px;">❯</button>
-                <div class="image-counter" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;">1/${images.length}</div>
+                <button class="image-nav-btn prev-btn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 50%; font-size: 16px; z-index: 10;">❮</button>
+                <button class="image-nav-btn next-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 50%; font-size: 16px; z-index: 10;">❯</button>
+                <div class="image-counter" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; z-index: 10;">1/${images.length}</div>
             ` : ''}
-            <span class="property-type">${property.type}</span>
+            <span class="property-type" style="position: absolute; top: 15px; right: 15px; background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; z-index: 10;">${property.type}</span>
         </div>
         <div class="property-details">
             <h3>${property.title}</h3>
@@ -152,7 +175,7 @@ function createPropertyCard(property) {
                 <span class="feature">🚿 ${property.bathrooms} Baths</span>
                 <span class="feature">📐 ${property.area} sq.ft</span>
             </div>
-            <p>${property.description?.substring(0, 100)}...</p>
+            <p>${property.description?.substring(0, 100)}${property.description?.length > 100 ? '...' : ''}</p>
             <div class="property-actions">
                 <a href="tel:9899130707" class="btn btn-call">📞 Call</a>
                 <a href="https://wa.me/919899130707?text=Hi%2C%20I'm%20interested%20in%20${encodeURIComponent(property.title)}%20in%20${property.location}" 
@@ -180,20 +203,23 @@ function createPropertyCard(property) {
             }
         };
         
-        if (prevBtn) prevBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            updateImage('prev');
-        });
+        if (prevBtn) {
+            prevBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                updateImage('prev');
+            });
+        }
         
-        if (nextBtn) nextBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            updateImage('next');
-        });
+        if (nextBtn) {
+            nextBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                updateImage('next');
+            });
+        }
     }
     
     return card;
 }
-
 // Format price to Indian format
 function formatPrice(price) {
     return price.toLocaleString('en-IN');
