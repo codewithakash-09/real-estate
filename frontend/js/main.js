@@ -95,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Global event delegation function - THIS FIXES THE ISSUE
+// Enhanced global image navigation with thumbnail support
 function setupGlobalImageNavigation() {
     // Use event delegation on the entire document
     document.addEventListener('click', function(e) {
@@ -102,70 +103,134 @@ function setupGlobalImageNavigation() {
         if (e.target.classList && e.target.classList.contains('prev-btn')) {
             e.stopPropagation();
             e.preventDefault();
-            
-            const propertyCard = e.target.closest('.property-card');
-            if (propertyCard) {
-                // Get or initialize the current image index
-                let currentIndex = parseInt(propertyCard.getAttribute('data-current-image') || '0');
-                const totalImages = parseInt(propertyCard.getAttribute('data-total-images') || '0');
-                const imagesJson = propertyCard.getAttribute('data-images');
-                
-                if (imagesJson && totalImages > 0) {
-                    const images = JSON.parse(imagesJson);
-                    currentIndex = (currentIndex - 1 + totalImages) % totalImages;
-                    
-                    // Update the image
-                    const imgElement = propertyCard.querySelector('.property-img');
-                    const counter = propertyCard.querySelector('.image-counter');
-                    
-                    if (imgElement) {
-                        imgElement.src = images[currentIndex];
-                    }
-                    if (counter) {
-                        counter.textContent = `${currentIndex + 1}/${totalImages}`;
-                    }
-                    
-                    // Store the new current index
-                    propertyCard.setAttribute('data-current-image', currentIndex);
-                }
-            }
+            navigateImage(e.target.closest('.property-card'), 'prev');
         }
         
         // Handle next button clicks
         if (e.target.classList && e.target.classList.contains('next-btn')) {
             e.stopPropagation();
             e.preventDefault();
-            
-            const propertyCard = e.target.closest('.property-card');
-            if (propertyCard) {
-                // Get or initialize the current image index
-                let currentIndex = parseInt(propertyCard.getAttribute('data-current-image') || '0');
-                const totalImages = parseInt(propertyCard.getAttribute('data-total-images') || '0');
-                const imagesJson = propertyCard.getAttribute('data-images');
-                
-                if (imagesJson && totalImages > 0) {
-                    const images = JSON.parse(imagesJson);
-                    currentIndex = (currentIndex + 1) % totalImages;
-                    
-                    // Update the image
-                    const imgElement = propertyCard.querySelector('.property-img');
-                    const counter = propertyCard.querySelector('.image-counter');
-                    
-                    if (imgElement) {
-                        imgElement.src = images[currentIndex];
-                    }
-                    if (counter) {
-                        counter.textContent = `${currentIndex + 1}/${totalImages}`;
-                    }
-                    
-                    // Store the new current index
-                    propertyCard.setAttribute('data-current-image', currentIndex);
-                }
+            navigateImage(e.target.closest('.property-card'), 'next');
+        }
+        
+        // Handle dot clicks
+        if (e.target.classList && e.target.classList.contains('dot')) {
+            e.stopPropagation();
+            const index = parseInt(e.target.getAttribute('data-index'));
+            navigateToImage(e.target.closest('.property-card'), index);
+        }
+        
+        // Handle thumbnail clicks
+        if (e.target.closest('.thumbnail')) {
+            e.stopPropagation();
+            const thumbnail = e.target.closest('.thumbnail');
+            const index = parseInt(thumbnail.getAttribute('data-index'));
+            navigateToImage(e.target.closest('.property-card'), index);
+        }
+    });
+    
+    // Add keyboard navigation for modal (optional)
+    document.addEventListener('keydown', function(e) {
+        const activeModal = document.querySelector('.image-modal.active');
+        if (activeModal) {
+            if (e.key === 'ArrowLeft') {
+                const card = activeModal.dataset.card;
+                navigateImage(document.querySelector(`.property-card[data-id="${card}"]`), 'prev');
+            } else if (e.key === 'ArrowRight') {
+                const card = activeModal.dataset.card;
+                navigateImage(document.querySelector(`.property-card[data-id="${card}"]`), 'next');
+            } else if (e.key === 'Escape') {
+                closeModal();
             }
         }
     });
 }
+// Navigation helper function
+function navigateImage(card, direction) {
+    if (!card) return;
+    
+    let currentIndex = parseInt(card.getAttribute('data-current-image') || '0');
+    const totalImages = parseInt(card.getAttribute('data-total-images') || '0');
+    const imagesJson = card.getAttribute('data-images');
+    
+    if (imagesJson && totalImages > 0) {
+        const images = JSON.parse(imagesJson);
+        
+        if (direction === 'next') {
+            currentIndex = (currentIndex + 1) % totalImages;
+        } else if (direction === 'prev') {
+            currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+        }
+        
+        updateCardImage(card, images, currentIndex, totalImages);
+    }
+}
 
+// Navigate to specific image
+function navigateToImage(card, index) {
+    if (!card) return;
+    
+    const totalImages = parseInt(card.getAttribute('data-total-images') || '0');
+    const imagesJson = card.getAttribute('data-images');
+    
+    if (imagesJson && totalImages > 0 && index >= 0 && index < totalImages) {
+        const images = JSON.parse(imagesJson);
+        updateCardImage(card, images, index, totalImages);
+    }
+}
+
+// Update card image and UI elements
+function updateCardImage(card, images, newIndex, totalImages) {
+    const imgElement = card.querySelector('.property-img');
+    const counter = card.querySelector('.image-counter');
+    const dots = card.querySelectorAll('.dot');
+    const thumbnails = card.querySelectorAll('.thumbnail');
+    
+    // Update main image with fade effect
+    if (imgElement) {
+        imgElement.style.opacity = '0.5';
+        imgElement.src = images[newIndex];
+        imgElement.onload = () => {
+            imgElement.style.opacity = '1';
+        };
+    }
+    
+    // Update counter
+    if (counter) {
+        counter.textContent = `${newIndex + 1}/${totalImages}`;
+    }
+    
+    // Update dots
+    dots.forEach((dot, idx) => {
+        if (idx === newIndex) {
+            dot.classList.add('active');
+            dot.style.background = 'white';
+        } else {
+            dot.classList.remove('active');
+            dot.style.background = 'rgba(255,255,255,0.5)';
+        }
+    });
+    
+    // Update thumbnails
+    thumbnails.forEach((thumb, idx) => {
+        if (idx === newIndex) {
+            thumb.classList.add('active');
+        } else {
+            thumb.classList.remove('active');
+        }
+    });
+    
+    // Store the new current index
+    card.setAttribute('data-current-image', newIndex);
+    
+    // Add a subtle pop animation to the counter
+    if (counter) {
+        counter.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+            counter.style.transform = 'scale(1)';
+        }, 200);
+    }
+}
 // Load and display properties
 async function loadProperties() {
     const propertyGrid = document.getElementById('propertyGrid');
