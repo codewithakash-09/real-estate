@@ -23,9 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
         .from('.hero-cta .btn', { y: 20, opacity: 0, duration: 0.6, stagger: 0.2, ease: 'back.out(1.7)' }, '-=0.3')
         .from('.badge', { scale: 0, opacity: 0, duration: 0.5, stagger: 0.1, ease: 'back.out(1.7)' }, '-=0.5');
     
-    // FIXED: Section headings animation - only for h2.section-title, not h3
-    const sectionHeadings = document.querySelectorAll('h2.section-title');
-    sectionHeadings.forEach(heading => {
+    // Section headings animation
+    const headings = document.querySelectorAll('.section-title, .section-subtitle');
+    headings.forEach(heading => {
         gsap.from(heading, {
             scrollTrigger: {
                 trigger: heading,
@@ -120,28 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
-
-    // FIXED: Background Image Parallax & Animation Effects
-    // REMOVED the Intersection Observer that was hiding sections
-    // Sections should NOT start with opacity: 0
-    
-    // Mouse parallax effect on background
-    document.addEventListener('mousemove', (e) => {
-        const mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-        const mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-        
-        document.documentElement.style.setProperty('--mouse-x', mouseX * 5);
-        document.documentElement.style.setProperty('--mouse-y', mouseY * 5);
-    });
-    
-    // Parallax effect on scroll
-    window.addEventListener('scroll', () => {
-        const scrollY = window.scrollY;
-        document.documentElement.style.setProperty('--bg-opacity', Math.min(0.15 + scrollY * 0.0002, 0.25));
-    });
 });
 
-// ============= BANK CARD FUNCTIONS =============
+// ============= BANK CARD FUNCTIONS (defined outside DOMContentLoaded) =============
 
 function initBankCardAnimations() {
     const bankCards = document.querySelectorAll('.bank-card');
@@ -267,89 +248,3 @@ function add3DTiltEffect() {
         });
     });
 }
-
-// FIXED: This script should NOT set sections to opacity:0
-// The old code that was hiding sections has been removed
-
-// Add mouse parallax to body::before pseudo-element
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-    @keyframes mouseParallax {
-        0% { transform: translate(0, 0); }
-        100% { transform: translate(calc(var(--mouse-x) * 1px), calc(var(--mouse-y) * 1px)); }
-    }
-`;
-document.head.appendChild(styleSheet);
-
-// ============= YELLOW GLOW SPARKLE EFFECTS =============
-document.addEventListener('DOMContentLoaded', () => {
-    // Add sparkles to all h2 section titles only (not h3 FAQ items)
-    const sectionTitles = document.querySelectorAll('h2.section-title, .hero-title');
-    
-    sectionTitles.forEach(title => {
-        // Set relative position for sparkle container
-        title.style.position = 'relative';
-        
-        // Create sparkle container
-        const sparkleContainer = document.createElement('div');
-        sparkleContainer.className = 'sparkle-container';
-        title.appendChild(sparkleContainer);
-        
-        // Create sparkles
-        createSparkles(sparkleContainer);
-        
-        // Recreate sparkles periodically
-        setInterval(() => createSparkles(sparkleContainer), 3000);
-    });
-    
-    function createSparkles(container) {
-        // Remove old sparkles
-        container.innerHTML = '';
-        
-        // Create new sparkles
-        for (let i = 0; i < 15; i++) {
-            setTimeout(() => {
-                const sparkle = document.createElement('div');
-                sparkle.className = 'sparkle';
-                sparkle.style.left = Math.random() * 100 + '%';
-                sparkle.style.top = Math.random() * 100 + '%';
-                sparkle.style.animationDuration = (1 + Math.random() * 2) + 's';
-                sparkle.style.animationDelay = Math.random() * 1 + 's';
-                
-                container.appendChild(sparkle);
-                
-                // Remove sparkle after animation
-                setTimeout(() => {
-                    if (sparkle.parentNode) {
-                        sparkle.remove();
-                    }
-                }, 3000);
-            }, i * 100);
-        }
-    }
-    
-    // FIXED: Only animate h2.section-title, not h3 elements
-    gsap.utils.toArray('h2.section-title').forEach(title => {
-        gsap.from(title, {
-            scrollTrigger: {
-                trigger: title,
-                start: 'top 85%',
-                toggleActions: 'play none none none'
-            },
-            opacity: 0,
-            y: 30,
-            scale: 0.9,
-            duration: 1,
-            ease: 'back.out(1.7)',
-            onComplete: () => {
-                // Add intense glow on reveal
-                gsap.to(title, {
-                    textShadow: '0 0 15px rgba(230, 164, 52, 0.9), 0 0 30px rgba(230, 164, 52, 0.6)',
-                    duration: 0.5,
-                    yoyo: true,
-                    repeat: 1
-                });
-            }
-        });
-    });
-});
