@@ -43,8 +43,7 @@ mongoose.connect(MONGODB_URI, {
     console.error('❌ MongoDB Connection Error:', err.message);
     console.log('⚠️  Continuing with in-memory fallback...');
 });
-
-// ============= SCHEMAS =============
+// Replace your existing propertySchema with this:
 const propertySchema = new mongoose.Schema({
     title: { type: String, required: true },
     price: { type: Number, required: true },
@@ -54,7 +53,8 @@ const propertySchema = new mongoose.Schema({
     bedrooms: { type: Number, required: true },
     bathrooms: { type: Number, required: true },
     area: { type: Number, required: true },
-    image: { type: String, default: '' },
+    images: { type: [String], default: [] }, // Array for multiple images
+    mainImage: { type: String, default: '' }, // Primary/cover image
     status: { type: String, enum: ['Available', 'Sold', 'Under Process'], default: 'Available' },
     createdAt: { type: Date, default: Date.now }
 });
@@ -88,6 +88,12 @@ let properties = [
         area: 850,
         description: 'Beautiful GDA flat in prime location of Vaishali, near metro station',
         status: 'Available',
+         images: [
+            'https://via.placeholder.com/800x600?text=Image+1',
+            'https://via.placeholder.com/800x600?text=Image+2',
+            'https://via.placeholder.com/800x600?text=Image+3'
+        ],
+        mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
         createdAt: new Date().toISOString()
     },
     {
@@ -101,6 +107,12 @@ let properties = [
         area: 1450,
         description: 'Luxurious builder apartment in Indirapuram with modern amenities',
         status: 'Available',
+        images: [
+            'https://via.placeholder.com/800x600?text=Image+1',
+            'https://via.placeholder.com/800x600?text=Image+2',
+            'https://via.placeholder.com/800x600?text=Image+3'
+        ],
+        mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
         createdAt: new Date().toISOString()
     },
     {
@@ -114,6 +126,12 @@ let properties = [
         area: 500,
         description: 'Affordable GDA flat in Raj Nagar Extension',
         status: 'Available',
+        images: [
+            'https://via.placeholder.com/800x600?text=Image+1',
+            'https://via.placeholder.com/800x600?text=Image+2',
+            'https://via.placeholder.com/800x600?text=Image+3'
+        ],
+        mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
         createdAt: new Date().toISOString()
     },
     {
@@ -127,6 +145,12 @@ let properties = [
         area: 900,
         description: 'Well-maintained builder floor near Greater Noida',
         status: 'Available',
+        images: [
+            'https://via.placeholder.com/800x600?text=Image+1',
+            'https://via.placeholder.com/800x600?text=Image+2',
+            'https://via.placeholder.com/800x600?text=Image+3'
+        ],
+        mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
         createdAt: new Date().toISOString()
     },
     {
@@ -140,6 +164,12 @@ let properties = [
         area: 1800,
         description: 'Spacious independent house with parking',
         status: 'Available',
+        images: [
+            'https://via.placeholder.com/800x600?text=Image+1',
+            'https://via.placeholder.com/800x600?text=Image+2',
+            'https://via.placeholder.com/800x600?text=Image+3'
+        ],
+        mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
         createdAt: new Date().toISOString()
     },
     {
@@ -153,6 +183,12 @@ let properties = [
         area: 750,
         description: 'Budget-friendly GDA flat on NH-24',
         status: 'Available',
+        images: [
+            'https://via.placeholder.com/800x600?text=Image+1',
+            'https://via.placeholder.com/800x600?text=Image+2',
+            'https://via.placeholder.com/800x600?text=Image+3'
+        ],
+        mainImage: 'https://via.placeholder.com/800x600?text=Main+Image',
         createdAt: new Date().toISOString()
     }
 ];
@@ -344,9 +380,13 @@ app.put('/api/leads/:id', authMiddleware, async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 });
+
 // ============= AUTH ROUTES =============
 
-// Read admin credentials from environment variables
+// Read from environment variables
+// ============= AUTH ROUTES =============
+
+// Read from environment variables
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'bittu';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'akash@1234';
 const ADMIN_PASSWORD_HASH = bcrypt.hashSync(ADMIN_PASSWORD, 10);
