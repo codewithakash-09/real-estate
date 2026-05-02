@@ -22,7 +22,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 const frontendPath = path.join(__dirname, '../frontend');
 console.log('Serving frontend from:', frontendPath);
 app.use(express.static(frontendPath));
-
+app.use('/admin', express.static(path.join(frontendPath, 'admin')));
 // ============= MONGODB CONNECTION =============
 const MONGODB_URI = process.env.MONGODB_URI;
 
