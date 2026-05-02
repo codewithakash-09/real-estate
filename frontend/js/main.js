@@ -120,49 +120,65 @@ function displayProperties(properties, container) {
         container.appendChild(card);
     });
 }
-
-// Update createPropertyCard function
-// Update createPropertyCard function - FIXED for external URLs
+// COMPLETELY FIXED createPropertyCard function
 function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
     
-    // Get images array - FIXED to handle different formats
-    let images = [];
+    // FIXED: Prioritize mainImage, then images array, then fallback
+    let displayImage = '';
     
-    // Check if property has images array
-    if (property.images && Array.isArray(property.images) && property.images.length > 0) {
-        images = property.images;
-    } 
-    // Check if property has mainImage
-    else if (property.mainImage && property.mainImage !== '') {
-        images = [property.mainImage];
+    console.log('Property data:', {
+        id: property._id,
+        title: property.title,
+        mainImage: property.mainImage,
+        images: property.images,
+        image: property.image
+    });
+    
+    // Check for mainImage first (this is the key fix)
+    if (property.mainImage && property.mainImage.trim() !== '') {
+        displayImage = property.mainImage;
+        console.log('Using mainImage:', displayImage);
     }
-    // Check if property has single image field
-    else if (property.image && property.image !== '') {
-        images = [property.image];
+    // Then check images array
+    else if (property.images && Array.isArray(property.images) && property.images.length > 0) {
+        displayImage = property.images[0];
+        console.log('Using first image from array:', displayImage);
+    }
+    // Then check old image field
+    else if (property.image && property.image.trim() !== '') {
+        displayImage = property.image;
+        console.log('Using image field:', displayImage);
     }
     // Fallback placeholder
     else {
-        images = ['https://via.placeholder.com/800x600?text=Property+Image'];
+        displayImage = 'https://via.placeholder.com/800x600?text=No+Image+Available';
+        console.log('Using placeholder');
     }
     
-    // Filter out any empty or invalid URLs
-    images = images.filter(img => img && img.trim() !== '');
-    
-    if (images.length === 0) {
-        images = ['https://via.placeholder.com/800x600?text=Property+Image'];
+    // Get all images for gallery
+    let allImages = [];
+    if (property.images && Array.isArray(property.images) && property.images.length > 0) {
+        allImages = property.images;
+    } else if (displayImage && displayImage !== 'https://via.placeholder.com/800x600?text=No+Image+Available') {
+        allImages = [displayImage];
     }
     
     let currentImageIndex = 0;
     
     card.innerHTML = `
-        <div class="property-image" style="position: relative; overflow: hidden; height: 250px;">
-            <img src="${images[0]}" alt="${property.title}" class="property-img" loading="lazy" style="width: 100%; height: 250px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/800x600?text=Image+Not+Found'">
-            ${images.length > 1 ? `
+        <div class="property-image" style="position: relative; overflow: hidden; height: 250px; background: #f0f0f0;">
+            <img src="${displayImage}" 
+                 alt="${property.title}" 
+                 class="property-img" 
+                 loading="lazy" 
+                 style="width: 100%; height: 250px; object-fit: cover;" 
+                 onerror="this.onerror=null; this.src='https://via.placeholder.com/800x600?text=Image+Load+Failed'; this.style.objectFit='contain';">
+            ${allImages.length > 1 ? `
                 <button class="image-nav-btn prev-btn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 50%; font-size: 16px; z-index: 10;">❮</button>
                 <button class="image-nav-btn next-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 50%; font-size: 16px; z-index: 10;">❯</button>
-                <div class="image-counter" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; z-index: 10;">1/${images.length}</div>
+                <div class="image-counter" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; z-index: 10;">1/${allImages.length}</div>
             ` : ''}
             <span class="property-type" style="position: absolute; top: 15px; right: 15px; background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; z-index: 10;">${property.type}</span>
         </div>
@@ -184,8 +200,8 @@ function createPropertyCard(property) {
         </div>
     `;
     
-    // Add image navigation functionality
-    if (images.length > 1) {
+    // Add image navigation if multiple images
+    if (allImages.length > 1) {
         const imgElement = card.querySelector('.property-img');
         const prevBtn = card.querySelector('.prev-btn');
         const nextBtn = card.querySelector('.next-btn');
@@ -193,13 +209,13 @@ function createPropertyCard(property) {
         
         const updateImage = (direction) => {
             if (direction === 'next') {
-                currentImageIndex = (currentImageIndex + 1) % images.length;
+                currentImageIndex = (currentImageIndex + 1) % allImages.length;
             } else {
-                currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+                currentImageIndex = (currentImageIndex - 1 + allImages.length) % allImages.length;
             }
-            imgElement.src = images[currentImageIndex];
+            imgElement.src = allImages[currentImageIndex];
             if (counter) {
-                counter.textContent = `${currentImageIndex + 1}/${images.length}`;
+                counter.textContent = `${currentImageIndex + 1}/${allImages.length}`;
             }
         };
         
