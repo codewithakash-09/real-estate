@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api';
+const API_BASE_URL = '/api';  // ✅ CORRECT
 let authToken = localStorage.getItem('authToken');
 
 // Check authentication on load
@@ -41,7 +41,6 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     }
 });
 
-// Rest of your code remains the same...
 // Show dashboard
 function showDashboard() {
     document.getElementById('loginScreen').style.display = 'none';
@@ -115,7 +114,169 @@ async function loadProperties() {
         console.error('Error loading properties:', error);
     }
 }
+// Add this to your existing admin.js
 
+// Handle multiple image uploads
+async function uploadImages(files) {
+    const uploadedUrls = [];
+    
+    for (let file of files) {
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert(`${file.name} is too large. Max 5MB.`);
+            continue;
+        }
+        
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+            alert(`${file.name} is not an image.`);
+            continue;
+        }
+        
+        // Convert to base64 (for demo - in production use cloud storage)
+        const reader = new FileReader();
+        const imageUrl = await new Promise((resolve) => {
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(file);
+        });
+        
+        uploadedUrls.push(imageUrl);
+    }
+    
+    return uploadedUrls;
+}
+
+// Update the property form submission
+document.getElementById('propertyForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const propertyId = document.getElementById('propertyId').value;
+    
+    // Handle image uploads
+    const imageFiles = document.getElementById('imageFiles')?.files;
+    let uploadedImages = [];
+    
+    if (imageFiles && imageFiles.length > 0) {
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Uploading Images...';
+        submitBtn.disabled = true;
+        
+        uploadedImages = await uploadImages(Array.from(imageFiles));
+        
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+    
+    // Get existing images from textarea
+    const imagesText = document.getElementById('images').value;
+    const existingImages = imagesText ? imagesText.split(',').map(url => url.trim()) : [];
+    
+    // Combine existing and newly uploaded images
+    const allImages = [...existingImages, ...uploadedImages];
+    
+    const formData = {
+        title: document.getElementById('title').value,
+        price: parseInt(document.getElementById('price').value),
+        location: document.getElementById('location').value,
+        type: document.getElementById('type').value,
+        bedrooms: parseInt(document.getElementById('bedrooms').value),
+        bathrooms: parseInt(document.getElementById('bathrooms').value),
+        area: parseInt(document.getElementById('area').value),
+        description: document.getElementById('description').value,
+        status: document.getElementById('status').value,
+        mainImage: document.getElementById('mainImage').value || (allImages[0] || ''),
+        images: allImages
+    };
+    
+    try {
+        const url = propertyId 
+            ? `${API_BASE_URL}/properties/${propertyId}`
+            : `${API_BASE_URL}/properties`;
+        
+        const method = propertyId ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+            alert(propertyId ? 'Property updated successfully' : 'Property added successfully');
+            showSection('properties');
+            loadProperties();
+        } else {
+            const error = await response.json();
+            alert(error.message || 'Failed to save property');
+        }
+    } catch (error) {
+        console.error('Error saving property:', error);
+        alert('Error saving property');
+    }
+});
+
+// Edit property (update to load images)
+async function editProperty(id) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/properties/${id}`);
+        const property = await response.json();
+        
+        document.getElementById('propertyId').value = property._id;
+        document.getElementById('title').value = property.title;
+        document.getElementById('price').value = property.price;
+        document.getElementById('location').value = property.location;
+        document.getElementById('type').value = property.type;
+        document.getElementById('bedrooms').value = property.bedrooms;
+        document.getElementById('bathrooms').value = property.bathrooms;
+        document.getElementById('area').value = property.area;
+        document.getElementById('description').value = property.description;
+        document.getElementById('status').value = property.status;
+        document.getElementById('mainImage').value = property.mainImage || '';
+        document.getElementById('images').value = property.images ? property.images.join(', ') : '';
+        
+        document.getElementById('formTitle').textContent = 'Edit Property';
+        document.getElementById('submitBtn').textContent = 'Update Property';
+        
+        showSection('addProperty');
+    } catch (error) {
+        console.error('Error loading property:', error);
+        alert('Failed to load property details');
+    }
+}
+// Add image preview functionality
+document.getElementById('imageFiles')?.addEventListener('change', function(e) {
+    const files = Array.from(e.target.files);
+    const previewContainer = document.getElementById('imagePreviewContainer') || createPreviewContainer();
+    
+    previewContainer.innerHTML = '';
+    
+    files.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const previewDiv = document.createElement('div');
+            previewDiv.className = 'image-preview-item';
+            previewDiv.innerHTML = `
+                <img src="${e.target.result}" alt="Preview ${index}">
+                <button class="remove-image-btn" data-index="${index}">×</button>
+            `;
+            previewContainer.appendChild(previewDiv);
+        };
+        reader.readAsDataURL(file);
+    });
+});
+
+function createPreviewContainer() {
+    const container = document.createElement('div');
+    container.id = 'imagePreviewContainer';
+    container.className = 'image-preview-grid';
+    const formGroup = document.querySelector('#imageFiles').parentElement;
+    formGroup.appendChild(container);
+    return container;
+}
 // Load leads
 async function loadLeads() {
     try {
