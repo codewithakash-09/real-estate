@@ -82,7 +82,7 @@
             <div class="about-grid">
                 <div class="about-image">
                     <div class="image-placeholder">
-                        <img src="./bittu.jpeg">
+                        <img src="./bittu.jpeg" alt="Bittu Khari - Property Expert">
                     </div>
                 </div>
                 <div class="about-content">
@@ -152,59 +152,83 @@
         </div>
     </section>
 
-    <!-- Loan Assistance Section -->
-    <section class="loans" id="loans">
-        <div class="container">
-            <h2 class="section-title">Home Loan Assistance</h2>
-            <p class="section-subtitle">Get the best home loan deals from our trusted banking partners</p>
-            <div class="bank-grid">
-                <div class="bank-card">
-                    <div class="bank-logo">HDFC</div>
-                    <h3>HDFC Bank</h3>
-                    <p>Lowest interest rates starting from 8.50%</p>
-                    <ul>
-                        <li>Quick disbursement</li>
-                        <li>Flexible tenure up to 30 years</li>
-                        <li>Minimal documentation</li>
-                    </ul>
+<!-- Loan Assistance Section -->
+<section class="loans" id="loans">
+    <div class="container">
+        <h2 class="section-title">Home Loan Assistance</h2>
+        <p class="section-subtitle">Get the best home loan deals from our trusted banking partners</p>
+        <div class="bank-grid">
+            <div class="bank-card" data-bank="hdfc">
+                <div class="bank-logo-container">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/HDFC_Bank_logo.svg/2560px-HDFC_Bank_logo.svg.png" 
+                         alt="HDFC Bank" 
+                         class="bank-logo-img"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="bank-logo-fallback">HDFC</div>
                 </div>
-                <div class="bank-card">
-                    <div class="bank-logo">ICICI</div>
-                    <h3>ICICI Bank</h3>
-                    <p>Special rates for women applicants from 8.45%</p>
-                    <ul>
-                        <li>Online application process</li>
-                        <li>Balance transfer facility</li>
-                        <li>Pre-approved loans</li>
-                    </ul>
-                </div>
-                <div class="bank-card">
-                    <div class="bank-logo">PIRAMAL</div>
-                    <h3>Piramal Housing Finance</h3>
-                    <p>Customized home loan solutions</p>
-                    <ul>
-                        <li>Loans up to ₹5 Crores</li>
-                        <li>Competitive interest rates</li>
-                        <li>Quick processing</li>
-                    </ul>
-                </div>
-                <div class="bank-card">
-                    <div class="bank-logo">INDIAN</div>
-                    <h3>Indian Bank</h3>
-                    <p>Government-backed affordable housing</p>
-                    <ul>
-                        <li>PM Awas Yojana benefits</li>
-                        <li>Low processing fees</li>
-                        <li>Special rural housing schemes</li>
-                    </ul>
-                </div>
+                <h3>HDFC Bank</h3>
+                <p>Lowest interest rates starting from 8.50%</p>
+                <ul>
+                    <li>Quick disbursement</li>
+                    <li>Flexible tenure up to 30 years</li>
+                    <li>Minimal documentation</li>
+                </ul>
             </div>
-            <div class="loan-cta">
-                <p>Need help with home loan? Contact us for free consultation</p>
-                <a href="tel:9899130707" class="btn btn-primary">Get Loan Assistance</a>
+            <div class="bank-card" data-bank="icici">
+                <div class="bank-logo-container">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/ICICI_Bank_logo.svg/2560px-ICICI_Bank_logo.svg.png" 
+                         alt="ICICI Bank" 
+                         class="bank-logo-img"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="bank-logo-fallback">ICICI</div>
+                </div>
+                <h3>ICICI Bank</h3>
+                <p>Special rates for women applicants from 8.45%</p>
+                <ul>
+                    <li>Online application process</li>
+                    <li>Balance transfer facility</li>
+                    <li>Pre-approved loans</li>
+                </ul>
+            </div>
+            <div class="bank-card" data-bank="piramal">
+                <div class="bank-logo-container">
+                    <img src="https://www.piramalfinance.com/sites/default/files/2022-10/piramal-finance-logo.svg" 
+                         alt="Piramal Housing Finance" 
+                         class="bank-logo-img"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="bank-logo-fallback">PIRAMAL</div>
+                </div>
+                <h3>Piramal Housing Finance</h3>
+                <p>Customized home loan solutions</p>
+                <ul>
+                    <li>Loans up to ₹5 Crores</li>
+                    <li>Competitive interest rates</li>
+                    <li>Quick processing</li>
+                </ul>
+            </div>
+            <div class="bank-card" data-bank="indian">
+                <div class="bank-logo-container">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Indian_Bank_logo.svg/2560px-Indian_Bank_logo.svg.png" 
+                         alt="Indian Bank" 
+                         class="bank-logo-img"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="bank-logo-fallback">INDIAN</div>
+                </div>
+                <h3>Indian Bank</h3>
+                <p>Government-backed affordable housing</p>
+                <ul>
+                    <li>PM Awas Yojana benefits</li>
+                    <li>Low processing fees</li>
+                    <li>Special rural housing schemes</li>
+                </ul>
             </div>
         </div>
-    </section>
+        <div class="loan-cta">
+            <p>Need help with home loan? Contact us for free consultation</p>
+            <a href="tel:9899130707" class="btn btn-primary">Get Loan Assistance</a>
+        </div>
+    </div>
+</section>
 
 <section class="locations" id="locations">
         <div class="container">
