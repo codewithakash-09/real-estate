@@ -707,11 +707,27 @@ body {
 }
 
 .image-nav-btn {
-    opacity: 0.8 !important;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px 15px;
     cursor: pointer;
+    border-radius: 50%;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.image-nav-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.image-nav-btn:active {
+    transform: translateY(-50%) scale(0.95);
 }
 
 .prev-btn {
@@ -720,16 +736,6 @@ body {
 
 .next-btn {
     right: 10px;
-}
-
-.image-nav-btn:hover {
-    opacity: 1 !important;
-    transform: translateY(-50%) scale(1.1);
-}
-
-
-.image-nav-btn:active {
-    transform: translateY(-50%) scale(0.95);
 }
 
 /* Image counter */
@@ -845,7 +851,7 @@ body {
     .image-dots {
         opacity: 1;
     }
-     .dot {
+    .dot {
         width: 10px;
         height: 10px;
         margin: 0 4px;
@@ -908,40 +914,36 @@ body {
 }
 
 .bank-card {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 2rem;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    text-align: center;
-    border: 2px solid transparent;
     position: relative;
+    border-radius: 20px;
     overflow: hidden;
+    color: #fff;
+    padding: 30px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    cursor: pointer;
+    border: 2px solid transparent;
 }
 
 .bank-card::before {
-    content: '';
+    content: "";
     position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(120deg, transparent, rgba(0, 153, 255, 0.22), transparent);
-    transition: left 0.6s ease;
-    z-index: 0;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.75));
+    z-index: 1;
     pointer-events: none;
 }
 
-.bank-card:hover::before {
-    left: 100%;
+.bank-card * {
+    position: relative;
+    z-index: 2;
 }
 
 .bank-card:hover {
     transform: translateY(-6px) scale(1.02);
     border-color: #4da6ff;
     box-shadow: 0 0 18px rgba(77, 166, 255, 0.45), 0 0 35px rgba(0, 122, 204, 0.25);
-    background: rgba(0, 122, 204, 0.08);
 }
 
 .bank-card:active {
@@ -949,6 +951,36 @@ body {
     box-shadow: 0 0 26px rgba(102, 189, 255, 0.95), 0 0 48px rgba(77, 166, 255, 0.65), 0 0 80px rgba(0, 122, 204, 0.35);
     background: rgba(77, 166, 255, 0.12);
     transition: all 0.1s ease;
+}
+
+.bank-card[data-bank="hdfc"],
+.bank-card.hdfc {
+    background-image: url('/images/hdfc.jpg');
+}
+
+.bank-card[data-bank="icici"],
+.bank-card.icici {
+    background-image: url('/images/icici.jpg');
+}
+
+.bank-card[data-bank="piramal"],
+.bank-card.piramal {
+    background-image: url('/images/piramal.jpg');
+}
+
+.bank-card[data-bank="indian"],
+.bank-card.indian {
+    background-image: url('/images/indianbank.jpg');
+}
+
+.bank-card[data-bank="sbi"],
+.bank-card.sbi {
+    background-image: linear-gradient(135deg, #2E6A9E, #1a4a6e);
+}
+
+.bank-card[data-bank="bob"],
+.bank-card.bob {
+    background-image: linear-gradient(135deg, #1F2A5E, #111a3d);
 }
 
 .bank-card::after {
@@ -1004,10 +1036,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: white;
+    background: rgba(255, 255, 255, 0.9);
     border-radius: 12px;
     padding: 15px;
     transition: all 0.3s ease;
+    backdrop-filter: blur(2px);
 }
 
 .bank-card:hover .bank-logo-container {
@@ -1048,19 +1081,21 @@ body {
     font-size: 1.3rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    color: #1a1a1a;
+    color: #ffffff;
     transition: color 0.3s ease;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .bank-card:hover h3 {
-    color: var(--primary);
+    color: #4da6ff;
 }
 
 .bank-card > p {
-    color: var(--primary);
+    color: var(--secondary);
     font-weight: 600;
     font-size: 0.9rem;
     margin-bottom: 1rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .bank-card ul {
@@ -1072,17 +1107,18 @@ body {
 .bank-card ul li {
     padding: 0.4rem 0;
     font-size: 0.85rem;
-    color: #4a5568;
+    color: rgba(255, 255, 255, 0.9);
     position: relative;
     padding-left: 1.5rem;
     transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .bank-card ul li:before {
     content: "✓";
     position: absolute;
     left: 0;
-    color: var(--primary);
+    color: var(--secondary);
     font-weight: bold;
     font-size: 0.9rem;
     transition: all 0.3s ease;
@@ -1090,7 +1126,7 @@ body {
 
 .bank-card:hover ul li {
     transform: translateX(3px);
-    color: var(--dark);
+    color: #ffffff;
 }
 
 .bank-card:hover ul li:before {
@@ -1169,6 +1205,20 @@ body {
     color: var(--dark);
     transform: translateY(-3px);
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 768px) {
+    .bank-card {
+        padding: 20px;
+    }
+    
+    .bank-card h3 {
+        font-size: 1.2rem;
+    }
+    
+    .bank-card ul li {
+        font-size: 0.8rem;
+    }
 }
 
 /* === LOCATIONS SECTION - BLUE THEME === */
