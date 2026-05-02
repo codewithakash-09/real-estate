@@ -117,7 +117,6 @@ body {
     100% { box-shadow: 0 0 0 0 rgba(0, 61, 77, 0); }
 }
 
-/* === NAVBAR === */
 /* === NAVBAR WITH BLUE THEME HOVER EFFECTS === */
 .navbar {
     background: rgba(255, 255, 255, 0.98);
@@ -158,7 +157,6 @@ body {
     transition: all 0.3s ease;
 }
 
-/* Logo hover effect - blue glow */
 .logo:hover {
     transform: translateY(-2px);
 }
@@ -189,7 +187,6 @@ body {
     display: inline-block;
 }
 
-/* Blue Glow Sweep Effect for nav links - Same as bank cards */
 .nav-links a::before {
     content: '';
     position: absolute;
@@ -197,12 +194,7 @@ body {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        120deg,
-        transparent,
-        rgba(0, 153, 255, 0.22),
-        transparent
-    );
+    background: linear-gradient(120deg, transparent, rgba(0, 153, 255, 0.22), transparent);
     transition: left 0.6s ease;
     z-index: -1;
     pointer-events: none;
@@ -212,25 +204,20 @@ body {
     left: 100%;
 }
 
-/* Premium Blue Glow Hover Effect for nav links */
 .nav-links a:hover {
     color: #4da6ff;
     transform: translateY(-2px);
-    box-shadow: 0 0 12px rgba(77, 166, 255, 0.3),
-                0 0 20px rgba(0, 122, 204, 0.15);
+    box-shadow: 0 0 12px rgba(77, 166, 255, 0.3), 0 0 20px rgba(0, 122, 204, 0.15);
     background: rgba(0, 122, 204, 0.08);
 }
 
-/* Intense Blue Flash on Click/Active for nav links */
 .nav-links a:active {
     transform: scale(0.98);
-    box-shadow: 0 0 16px rgba(102, 189, 255, 0.5),
-                0 0 24px rgba(77, 166, 255, 0.3);
+    box-shadow: 0 0 16px rgba(102, 189, 255, 0.5), 0 0 24px rgba(77, 166, 255, 0.3);
     background: rgba(77, 166, 255, 0.12);
     transition: all 0.1s ease;
 }
 
-/* Shine Sweep Effect on Hover for nav links */
 .nav-links a::after {
     content: '';
     position: absolute;
@@ -238,12 +225,7 @@ body {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: linear-gradient(
-        45deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.15) 50%,
-        transparent 70%
-    );
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.15) 50%, transparent 70%);
     transform: rotate(45deg);
     transition: all 0.6s ease;
     opacity: 0;
@@ -256,7 +238,6 @@ body {
     transform: rotate(45deg) translate(50%, 50%);
 }
 
-/* Active link indicator - blue underline */
 .nav-links a.active {
     color: var(--primary);
     position: relative;
@@ -274,14 +255,12 @@ body {
     border-radius: 2px;
 }
 
-/* Call button in navbar with same blue theme */
 .nav-cta .btn-call {
     position: relative;
     overflow: hidden;
     transition: all 0.3s ease;
 }
 
-/* Blue Glow Sweep Effect for call button */
 .nav-cta .btn-call::before {
     content: '';
     position: absolute;
@@ -289,12 +268,7 @@ body {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        120deg,
-        transparent,
-        rgba(0, 153, 255, 0.3),
-        transparent
-    );
+    background: linear-gradient(120deg, transparent, rgba(0, 153, 255, 0.3), transparent);
     transition: left 0.6s ease;
     z-index: 0;
 }
@@ -303,23 +277,19 @@ body {
     left: 100%;
 }
 
-/* Premium Blue Glow for call button */
 .nav-cta .btn-call:hover {
     background: #4da6ff;
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 0 15px rgba(77, 166, 255, 0.5),
-                0 0 25px rgba(0, 122, 204, 0.3);
+    box-shadow: 0 0 15px rgba(77, 166, 255, 0.5), 0 0 25px rgba(0, 122, 204, 0.3);
 }
 
-/* Intense Blue Flash on click for call button */
 .nav-cta .btn-call:active {
     transform: scale(0.98);
     box-shadow: 0 0 20px rgba(77, 166, 255, 0.7);
     transition: all 0.1s ease;
 }
 
-/* Mobile menu button with blue theme */
 .mobile-menu-btn {
     display: none;
     background: none;
@@ -333,7 +303,6 @@ body {
     overflow: hidden;
 }
 
-/* Blue Glow Sweep Effect for mobile menu button */
 .mobile-menu-btn::before {
     content: '';
     position: absolute;
@@ -341,12 +310,7 @@ body {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        120deg,
-        transparent,
-        rgba(0, 153, 255, 0.22),
-        transparent
-    );
+    background: linear-gradient(120deg, transparent, rgba(0, 153, 255, 0.22), transparent);
     transition: left 0.6s ease;
     z-index: -1;
 }
@@ -368,7 +332,6 @@ body {
     transition: all 0.1s ease;
 }
 
-/* Mobile menu dropdown with same styling */
 .nav-links.active {
     display: flex;
     flex-direction: column;
@@ -389,32 +352,7 @@ body {
     text-align: center;
 }
 
-/* Responsive navbar adjustments */
-@media (max-width: 768px) {
-    .nav-links {
-        display: none;
-    }
-    
-    .nav-links.active {
-        display: flex;
-    }
-    
-    .mobile-menu-btn {
-        display: block;
-    }
-    
-    .nav-links a {
-        padding: 0.75rem 1rem;
-        text-align: center;
-    }
-    
-    /* Adjust active underline for mobile */
-    .nav-links a.active::before {
-        bottom: 0;
-        width: 40%;
-    }
-}
-/* Image Modal Styles */
+/* === IMAGE MODAL STYLES === */
 .image-modal {
     position: fixed;
     top: 0;
@@ -517,27 +455,7 @@ body {
         font-size: 16px;
     }
 }
-/* Make navigation buttons always visible - not just on hover */
-.image-nav-btn {
-    opacity: 0.8 !important;
-}
 
-.image-nav-btn:hover {
-    opacity: 1 !important;
-}
-
-.image-dots {
-    opacity: 0.8 !important;
-}
-
-/* Button visibility */
-.image-nav-btn {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-}
 /* === HERO SECTION === */
 .hero {
     height: 100vh;
@@ -712,23 +630,6 @@ body {
     background: rgba(255, 255, 255, 0.98);
 }
 
-.property-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.property-type {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: var(--primary);
-    color: var(--white);
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-}
-
 .property-details {
     padding: 1.5rem;
 }
@@ -771,67 +672,123 @@ body {
     padding: 10px;
     font-size: 0.9rem;
 }
+
 /* === PROPERTY IMAGE CAROUSEL STYLES === */
 .property-image {
     position: relative;
     overflow: hidden;
-    cursor: pointer;
-}
-
-.image-nav-btn {
-    transition: all 0.3s ease;
-    z-index: 10;
-    font-weight: bold;
-    opacity: 0;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.property-card:hover .image-nav-btn {
-    opacity: 1;
-}
-
-.image-nav-btn:hover {
-    background: rgba(0,0,0,0.8) !important;
-    transform: translateY(-50%) scale(1.1);
-}
-
-.image-nav-btn:active {
-    transform: translateY(-50%) scale(0.95);
+    height: 280px;
+    background: #f0f0f0;
 }
 
 .property-img {
-    transition: transform 0.3s ease;
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 .property-card:hover .property-img {
     transform: scale(1.05);
 }
 
-.image-counter {
+.property-type {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--primary);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    z-index: 10;
     font-weight: 500;
-    backdrop-filter: blur(4px);
-    font-size: 12px;
-    font-family: monospace;
 }
 
-.image-dots {
-    display: flex;
-    gap: 8px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+/* Navigation buttons */
+.image-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 18px;
+    z-index: 10;
+    transition: all 0.3s ease;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    opacity: 0.8;
 }
 
-.property-card:hover .image-dots {
+.prev-btn {
+    left: 10px;
+}
+
+.next-btn {
+    right: 10px;
+}
+
+.image-nav-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: translateY(-50%) scale(1.1);
     opacity: 1;
 }
 
-.image-dots .dot {
+.image-nav-btn:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+/* Image counter */
+.image-counter {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    z-index: 10;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+    font-family: monospace;
+}
+
+/* Dot indicators */
+.image-dots {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+    opacity: 0.8;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.image-dots .dot:hover {
+.dot.active {
+    background: white;
+}
+
+.dot:hover {
     transform: scale(1.2);
-    background: white !important;
+    background: white;
 }
 
 /* Thumbnail Navigation */
@@ -885,28 +842,13 @@ body {
     box-shadow: 0 0 8px rgba(77, 166, 255, 0.5);
 }
 
-/* Badge for number of images */
-.image-count-badge {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    background: rgba(0,0,0,0.6);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    z-index: 10;
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
 /* Mobile touch optimizations */
 @media (max-width: 768px) {
     .image-nav-btn {
         padding: 8px 12px !important;
         font-size: 14px !important;
+        width: 32px;
+        height: 32px;
     }
     
     .thumbnail {
@@ -922,25 +864,48 @@ body {
         opacity: 0.7;
     }
 }
+
+/* Admin panel image preview */
+.image-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.image-preview-item {
+    position: relative;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+}
+
+.remove-image-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
 /* === LOANS SECTION - BLUE THEME === */
 .loans {
     padding: 5rem 0;
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     position: relative;
     overflow: hidden;
-}
-
-.loans::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background:
-        radial-gradient(circle at 20% 80%, rgba(0, 61, 77, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(0, 61, 77, 0.03) 0%, transparent 50%);
-    pointer-events: none;
 }
 
 .bank-grid {
@@ -951,7 +916,6 @@ body {
     perspective: 1000px;
 }
 
-/* Bank Card Base Styles */
 .bank-card {
     background: rgba(255, 255, 255, 0.95);
     padding: 2rem;
@@ -965,7 +929,6 @@ body {
     cursor: pointer;
 }
 
-/* Blue Glow Sweep Effect */
 .bank-card::before {
     content: '';
     position: absolute;
@@ -973,12 +936,7 @@ body {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        120deg,
-        transparent,
-        rgba(0, 153, 255, 0.22),
-        transparent
-    );
+    background: linear-gradient(120deg, transparent, rgba(0, 153, 255, 0.22), transparent);
     transition: left 0.6s ease;
     z-index: 0;
     pointer-events: none;
@@ -988,26 +946,20 @@ body {
     left: 100%;
 }
 
-/* Premium Blue Glow Hover Effect */
 .bank-card:hover {
     transform: translateY(-6px) scale(1.02);
     border-color: #4da6ff;
-    box-shadow: 0 0 18px rgba(77, 166, 255, 0.45),
-                0 0 35px rgba(0, 122, 204, 0.25);
+    box-shadow: 0 0 18px rgba(77, 166, 255, 0.45), 0 0 35px rgba(0, 122, 204, 0.25);
     background: rgba(0, 122, 204, 0.08);
 }
 
-/* Intense Blue Flash on Click/Active */
 .bank-card:active {
     transform: scale(0.98) rotate(-1deg);
-    box-shadow: 0 0 26px rgba(102, 189, 255, 0.95),
-                0 0 48px rgba(77, 166, 255, 0.65),
-                0 0 80px rgba(0, 122, 204, 0.35);
+    box-shadow: 0 0 26px rgba(102, 189, 255, 0.95), 0 0 48px rgba(77, 166, 255, 0.65), 0 0 80px rgba(0, 122, 204, 0.35);
     background: rgba(77, 166, 255, 0.12);
     transition: all 0.1s ease;
 }
 
-/* Shine Sweep Effect on Hover */
 .bank-card::after {
     content: '';
     position: absolute;
@@ -1015,12 +967,7 @@ body {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: linear-gradient(
-        45deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.15) 50%,
-        transparent 70%
-    );
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.15) 50%, transparent 70%);
     transform: rotate(45deg);
     transition: all 0.6s ease;
     opacity: 0;
@@ -1033,27 +980,15 @@ body {
     transform: rotate(45deg) translate(50%, 50%);
 }
 
-/* Animation for cards appearing */
 .bank-card.animate-in {
     animation: cardPopIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 @keyframes cardPopIn {
-    0% {
-        opacity: 0;
-        transform: translateY(60px) scale(0.9);
-    }
-    60% {
-        opacity: 1;
-        transform: translateY(-10px) scale(1.02);
-    }
-    80% {
-        transform: translateY(5px) scale(0.99);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+    0% { opacity: 0; transform: translateY(60px) scale(0.9); }
+    60% { opacity: 1; transform: translateY(-10px) scale(1.02); }
+    80% { transform: translateY(5px) scale(0.99); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .bank-card:nth-child(1) { animation-delay: 0.1s; }
@@ -1063,7 +998,6 @@ body {
 .bank-card:nth-child(5) { animation-delay: 0.7s; }
 .bank-card:nth-child(6) { animation-delay: 0.85s; }
 
-/* Make content stay above pseudo-elements */
 .bank-logo-container,
 .bank-card h3,
 .bank-card > p,
@@ -1072,7 +1006,6 @@ body {
     z-index: 1;
 }
 
-/* Bank Logo Container */
 .bank-logo-container {
     width: 120px;
     height: 80px;
@@ -1113,7 +1046,6 @@ body {
     justify-content: center;
 }
 
-/* Bank-specific fallback logo colors */
 .bank-card[data-bank="hdfc"] .bank-logo-fallback { color: #004B8D; }
 .bank-card[data-bank="icici"] .bank-logo-fallback { color: #F15A29; }
 .bank-card[data-bank="sbi"] .bank-logo-fallback { color: #2E6A9E; }
@@ -1121,7 +1053,6 @@ body {
 .bank-card[data-bank="indian"] .bank-logo-fallback { color: #1E5F47; }
 .bank-card[data-bank="bob"] .bank-logo-fallback { color: #1F2A5E; }
 
-/* Bank Card Typography */
 .bank-card h3 {
     font-size: 1.3rem;
     font-weight: 700;
@@ -1141,7 +1072,6 @@ body {
     margin-bottom: 1rem;
 }
 
-/* Bank Card List Styles */
 .bank-card ul {
     list-style: none;
     margin-top: 1rem;
@@ -1177,32 +1107,13 @@ body {
     transform: scale(1.1);
 }
 
-/* Bank-specific border colors on hover */
-.bank-card[data-bank="hdfc"]:hover {
-    border-bottom: 3px solid #004B8D;
-}
+.bank-card[data-bank="hdfc"]:hover { border-bottom: 3px solid #004B8D; }
+.bank-card[data-bank="icici"]:hover { border-bottom: 3px solid #F15A29; }
+.bank-card[data-bank="sbi"]:hover { border-bottom: 3px solid #2E6A9E; }
+.bank-card[data-bank="piramal"]:hover { border-bottom: 3px solid #003d4d; }
+.bank-card[data-bank="indian"]:hover { border-bottom: 3px solid #1E5F47; }
+.bank-card[data-bank="bob"]:hover { border-bottom: 3px solid #1F2A5E; }
 
-.bank-card[data-bank="icici"]:hover {
-    border-bottom: 3px solid #F15A29;
-}
-
-.bank-card[data-bank="sbi"]:hover {
-    border-bottom: 3px solid #2E6A9E;
-}
-
-.bank-card[data-bank="piramal"]:hover {
-    border-bottom: 3px solid #003d4d;
-}
-
-.bank-card[data-bank="indian"]:hover {
-    border-bottom: 3px solid #1E5F47;
-}
-
-.bank-card[data-bank="bob"]:hover {
-    border-bottom: 3px solid #1F2A5E;
-}
-
-/* Loan CTA Section */
 .loan-cta {
     text-align: center;
     margin-top: 4rem;
@@ -1283,7 +1194,6 @@ body {
     perspective: 1000px;
 }
 
-/* Location Card Base Styles - Same as Bank Cards */
 .location-card {
     background: rgba(255, 255, 255, 0.95);
     padding: 2rem;
@@ -1297,7 +1207,6 @@ body {
     cursor: pointer;
 }
 
-/* Blue Glow Sweep Effect */
 .location-card::before {
     content: '';
     position: absolute;
@@ -1305,12 +1214,7 @@ body {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        120deg,
-        transparent,
-        rgba(0, 153, 255, 0.22),
-        transparent
-    );
+    background: linear-gradient(120deg, transparent, rgba(0, 153, 255, 0.22), transparent);
     transition: left 0.6s ease;
     z-index: 0;
     pointer-events: none;
@@ -1320,26 +1224,20 @@ body {
     left: 100%;
 }
 
-/* Premium Blue Glow Hover Effect */
 .location-card:hover {
     transform: translateY(-6px) scale(1.02);
     border-color: #4da6ff;
-    box-shadow: 0 0 18px rgba(77, 166, 255, 0.45),
-                0 0 35px rgba(0, 122, 204, 0.25);
+    box-shadow: 0 0 18px rgba(77, 166, 255, 0.45), 0 0 35px rgba(0, 122, 204, 0.25);
     background: rgba(0, 122, 204, 0.08);
 }
 
-/* Intense Blue Flash on Click/Active */
 .location-card:active {
     transform: scale(0.98) rotate(-1deg);
-    box-shadow: 0 0 26px rgba(102, 189, 255, 0.95),
-                0 0 48px rgba(77, 166, 255, 0.65),
-                0 0 80px rgba(0, 122, 204, 0.35);
+    box-shadow: 0 0 26px rgba(102, 189, 255, 0.95), 0 0 48px rgba(77, 166, 255, 0.65), 0 0 80px rgba(0, 122, 204, 0.35);
     background: rgba(77, 166, 255, 0.12);
     transition: all 0.1s ease;
 }
 
-/* Shine Sweep Effect on Hover */
 .location-card::after {
     content: '';
     position: absolute;
@@ -1347,12 +1245,7 @@ body {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: linear-gradient(
-        45deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.15) 50%,
-        transparent 70%
-    );
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.15) 50%, transparent 70%);
     transform: rotate(45deg);
     transition: all 0.6s ease;
     opacity: 0;
@@ -1365,7 +1258,6 @@ body {
     transform: rotate(45deg) translate(50%, 50%);
 }
 
-/* Make content stay above pseudo-elements */
 .location-icon,
 .location-card h3,
 .location-card p {
@@ -1373,7 +1265,6 @@ body {
     z-index: 1;
 }
 
-/* Location Icon Styling */
 .location-icon svg {
     width: 60px;
     height: 60px;
@@ -1437,7 +1328,6 @@ body {
     margin-top: 3rem;
 }
 
-/* FAQ Item Base Styles - Same as Bank Cards */
 .faq-item {
     background: rgba(255, 255, 255, 0.95);
     padding: 2rem;
@@ -1450,7 +1340,6 @@ body {
     cursor: pointer;
 }
 
-/* Blue Glow Sweep Effect */
 .faq-item::before {
     content: '';
     position: absolute;
@@ -1458,12 +1347,7 @@ body {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        120deg,
-        transparent,
-        rgba(0, 153, 255, 0.15),
-        transparent
-    );
+    background: linear-gradient(120deg, transparent, rgba(0, 153, 255, 0.15), transparent);
     transition: left 0.6s ease;
     z-index: 0;
     pointer-events: none;
@@ -1473,22 +1357,18 @@ body {
     left: 100%;
 }
 
-/* Premium Blue Glow Hover Effect */
 .faq-item:hover {
     transform: translateY(-6px) scale(1.02);
     border-left-color: #4da6ff;
-    box-shadow: 0 0 18px rgba(77, 166, 255, 0.3),
-                0 0 35px rgba(0, 122, 204, 0.15);
+    box-shadow: 0 0 18px rgba(77, 166, 255, 0.3), 0 0 35px rgba(0, 122, 204, 0.15);
     background: rgba(0, 122, 204, 0.05);
 }
 
-/* Intense Blue Flash on Click/Active */
 .faq-item:active {
     transform: scale(0.98);
     transition: all 0.1s ease;
 }
 
-/* Make content stay above pseudo-elements */
 .faq-item h3,
 .faq-item p {
     position: relative;
@@ -1778,69 +1658,6 @@ body {
     text-align: center;
 }
 
-/* === PROPERTY IMAGE GALLERY STYLES === */
-.property-image {
-    position: relative;
-    overflow: hidden;
-}
-
-.image-nav-btn {
-    transition: all 0.3s ease;
-    z-index: 10;
-}
-
-.image-nav-btn:hover {
-    background: rgba(0,0,0,0.8) !important;
-    transform: translateY(-50%) scale(1.1);
-}
-
-.property-img {
-    transition: transform 0.3s ease;
-}
-
-.property-card:hover .property-img {
-    transform: scale(1.05);
-}
-
-.image-counter {
-    font-weight: 500;
-    backdrop-filter: blur(4px);
-}
-
-.image-preview-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.image-preview-item {
-    position: relative;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.image-preview-item img {
-    width: 100%;
-    height: 100px;
-    object-fit: cover;
-}
-
-.remove-image-btn {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: red;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 25px;
-    height: 25px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
 /* === BACKGROUND IMAGE WITH LIGHT OVERLAY === */
 body {
     position: relative;
@@ -1863,15 +1680,10 @@ body::before {
 }
 
 @keyframes subtleFloat {
-    0% {
-        transform: scale(1) translate(0, 0);
-    }
-    100% {
-        transform: scale(1.05) translate(-10px, -5px);
-    }
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.05) translate(-10px, -5px); }
 }
 
-/* LIGHT OVERLAY - MUCH LIGHTER FOR BETTER READABILITY */
 body::after {
     content: '';
     position: fixed;
@@ -1880,15 +1692,9 @@ body::after {
     width: 100%;
     height: 100%;
     z-index: -1;
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.88) 0%,
-        rgba(248, 249, 250, 0.85) 50%,
-        rgba(255, 255, 255, 0.88) 100%
-    );
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(248, 249, 250, 0.85) 50%, rgba(255, 255, 255, 0.88) 100%);
 }
 
-/* Individual section backgrounds - solid for readability */
 .about, .testimonials, .contact {
     background: rgba(248, 249, 250, 0.92) !important;
 }
@@ -1897,7 +1703,6 @@ body::after {
     background: transparent;
 }
 
-/* Hero section stays solid */
 .hero {
     background: linear-gradient(135deg, var(--primary), var(--primary-light)) !important;
 }
@@ -1923,15 +1728,6 @@ body::after {
     
     .nav-links.active {
         display: flex;
-        flex-direction: column;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: rgba(255, 255, 255, 0.98);
-        padding: 1rem;
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(10px);
     }
     
     .mobile-menu-btn {
