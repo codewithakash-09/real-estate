@@ -7,26 +7,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
     const navLinks = document.querySelector('.nav-links');
     
-    mobileMenuBtn.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-    });
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+    }
     
     // Close mobile menu on link click
-    navLinks.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            navLinks.classList.remove('active');
+    if (navLinks) {
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+            });
         });
-    });
+    }
     
     // Navbar scroll effect
     window.addEventListener('scroll', () => {
         const navbar = document.getElementById('navbar');
-        if (window.scrollY > 50) {
-            navbar.style.boxShadow = '0 5px 20px rgba(0,0,0,0.15)';
-            navbar.style.padding = '0.8rem 0';
-        } else {
-            navbar.style.boxShadow = '0 2px 15px rgba(0,0,0,0.1)';
-            navbar.style.padding = '1rem 0';
+        if (navbar) {
+            if (window.scrollY > 50) {
+                navbar.style.boxShadow = '0 5px 20px rgba(0,0,0,0.15)';
+                navbar.style.padding = '0.8rem 0';
+            } else {
+                navbar.style.boxShadow = '0 2px 15px rgba(0,0,0,0.1)';
+                navbar.style.padding = '1rem 0';
+            }
         }
     });
     
@@ -83,7 +89,82 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    
+    // Global event delegation for image navigation buttons - FIXED
+    setupGlobalImageNavigation();
 });
+
+// Global event delegation function - THIS FIXES THE ISSUE
+function setupGlobalImageNavigation() {
+    // Use event delegation on the entire document
+    document.addEventListener('click', function(e) {
+        // Handle previous button clicks
+        if (e.target.classList && e.target.classList.contains('prev-btn')) {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            const propertyCard = e.target.closest('.property-card');
+            if (propertyCard) {
+                // Get or initialize the current image index
+                let currentIndex = parseInt(propertyCard.getAttribute('data-current-image') || '0');
+                const totalImages = parseInt(propertyCard.getAttribute('data-total-images') || '0');
+                const imagesJson = propertyCard.getAttribute('data-images');
+                
+                if (imagesJson && totalImages > 0) {
+                    const images = JSON.parse(imagesJson);
+                    currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+                    
+                    // Update the image
+                    const imgElement = propertyCard.querySelector('.property-img');
+                    const counter = propertyCard.querySelector('.image-counter');
+                    
+                    if (imgElement) {
+                        imgElement.src = images[currentIndex];
+                    }
+                    if (counter) {
+                        counter.textContent = `${currentIndex + 1}/${totalImages}`;
+                    }
+                    
+                    // Store the new current index
+                    propertyCard.setAttribute('data-current-image', currentIndex);
+                }
+            }
+        }
+        
+        // Handle next button clicks
+        if (e.target.classList && e.target.classList.contains('next-btn')) {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            const propertyCard = e.target.closest('.property-card');
+            if (propertyCard) {
+                // Get or initialize the current image index
+                let currentIndex = parseInt(propertyCard.getAttribute('data-current-image') || '0');
+                const totalImages = parseInt(propertyCard.getAttribute('data-total-images') || '0');
+                const imagesJson = propertyCard.getAttribute('data-images');
+                
+                if (imagesJson && totalImages > 0) {
+                    const images = JSON.parse(imagesJson);
+                    currentIndex = (currentIndex + 1) % totalImages;
+                    
+                    // Update the image
+                    const imgElement = propertyCard.querySelector('.property-img');
+                    const counter = propertyCard.querySelector('.image-counter');
+                    
+                    if (imgElement) {
+                        imgElement.src = images[currentIndex];
+                    }
+                    if (counter) {
+                        counter.textContent = `${currentIndex + 1}/${totalImages}`;
+                    }
+                    
+                    // Store the new current index
+                    propertyCard.setAttribute('data-current-image', currentIndex);
+                }
+            }
+        }
+    });
+}
 
 // Load and display properties
 async function loadProperties() {
@@ -97,14 +178,12 @@ async function loadProperties() {
         const properties = await fetchProperties();
         
         if (properties.length === 0) {
-            // Show sample properties if API is not connected
             displaySampleProperties(propertyGrid);
         } else {
             displayProperties(properties, propertyGrid);
         }
     } catch (error) {
         console.error('Error loading properties:', error);
-        // Show sample properties as fallback
         displaySampleProperties(propertyGrid);
     } finally {
         loadingSpinner.style.display = 'none';
@@ -120,52 +199,46 @@ function displayProperties(properties, container) {
         container.appendChild(card);
     });
 }
-// COMPLETELY FIXED createPropertyCard function
+
+// COMPLETELY FIXED createPropertyCard function with data attributes
 function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
     
-    // FIXED: Prioritize mainImage, then images array, then fallback
-    let displayImage = '';
+    // Get all images for gallery
+    let allImages = [];
     
-    console.log('Property data:', {
-        id: property._id,
-        title: property.title,
-        mainImage: property.mainImage,
-        images: property.images,
-        image: property.image
-    });
-    
-    // Check for mainImage first (this is the key fix)
-    if (property.mainImage && property.mainImage.trim() !== '') {
-        displayImage = property.mainImage;
-        console.log('Using mainImage:', displayImage);
+    // Check for images array first
+    if (property.images && Array.isArray(property.images) && property.images.length > 0) {
+        allImages = property.images;
+    } 
+    // Check for mainImage
+    else if (property.mainImage && property.mainImage.trim() !== '') {
+        allImages = [property.mainImage];
     }
-    // Then check images array
-    else if (property.images && Array.isArray(property.images) && property.images.length > 0) {
-        displayImage = property.images[0];
-        console.log('Using first image from array:', displayImage);
-    }
-    // Then check old image field
+    // Check for old image field
     else if (property.image && property.image.trim() !== '') {
-        displayImage = property.image;
-        console.log('Using image field:', displayImage);
+        allImages = [property.image];
     }
     // Fallback placeholder
     else {
-        displayImage = 'https://via.placeholder.com/800x600?text=No+Image+Available';
-        console.log('Using placeholder');
+        allImages = ['https://via.placeholder.com/800x600?text=Property+Image'];
     }
     
-    // Get all images for gallery
-    let allImages = [];
-    if (property.images && Array.isArray(property.images) && property.images.length > 0) {
-        allImages = property.images;
-    } else if (displayImage && displayImage !== 'https://via.placeholder.com/800x600?text=No+Image+Available') {
-        allImages = [displayImage];
+    // Filter out empty URLs
+    allImages = allImages.filter(img => img && img.trim() !== '');
+    
+    if (allImages.length === 0) {
+        allImages = ['https://via.placeholder.com/800x600?text=Property+Image'];
     }
     
-    let currentImageIndex = 0;
+    // Store images as JSON on the card for global navigation
+    card.setAttribute('data-images', JSON.stringify(allImages));
+    card.setAttribute('data-total-images', allImages.length);
+    card.setAttribute('data-current-image', '0');
+    
+    // Get display image (first image)
+    const displayImage = allImages[0];
     
     card.innerHTML = `
         <div class="property-image" style="position: relative; overflow: hidden; height: 250px; background: #f0f0f0;">
@@ -176,22 +249,22 @@ function createPropertyCard(property) {
                  style="width: 100%; height: 250px; object-fit: cover;" 
                  onerror="this.onerror=null; this.src='https://via.placeholder.com/800x600?text=Image+Load+Failed'; this.style.objectFit='contain';">
             ${allImages.length > 1 ? `
-                <button class="image-nav-btn prev-btn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 50%; font-size: 16px; z-index: 10;">❮</button>
-                <button class="image-nav-btn next-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 50%; font-size: 16px; z-index: 10;">❯</button>
-                <div class="image-counter" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; z-index: 10;">1/${allImages.length}</div>
+                <button class="image-nav-btn prev-btn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.7); color: white; border: none; padding: 10px 14px; cursor: pointer; border-radius: 50%; font-size: 18px; z-index: 10; transition: all 0.3s ease;">❮</button>
+                <button class="image-nav-btn next-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.7); color: white; border: none; padding: 10px 14px; cursor: pointer; border-radius: 50%; font-size: 18px; z-index: 10; transition: all 0.3s ease;">❯</button>
+                <div class="image-counter" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; z-index: 10; font-weight: 500;">1/${allImages.length}</div>
             ` : ''}
             <span class="property-type" style="position: absolute; top: 15px; right: 15px; background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; z-index: 10;">${property.type}</span>
         </div>
         <div class="property-details">
-            <h3>${property.title}</h3>
+            <h3>${escapeHtml(property.title)}</h3>
             <div class="property-price">₹${formatPrice(property.price)}</div>
-            <div class="property-location">📍 ${property.location}</div>
+            <div class="property-location">📍 ${escapeHtml(property.location)}</div>
             <div class="property-features">
                 <span class="feature">🛏️ ${property.bedrooms} Beds</span>
                 <span class="feature">🚿 ${property.bathrooms} Baths</span>
                 <span class="feature">📐 ${property.area} sq.ft</span>
             </div>
-            <p>${property.description?.substring(0, 100)}${property.description?.length > 100 ? '...' : ''}</p>
+            <p>${escapeHtml(property.description?.substring(0, 100))}${property.description?.length > 100 ? '...' : ''}</p>
             <div class="property-actions">
                 <a href="tel:9899130707" class="btn btn-call">📞 Call</a>
                 <a href="https://wa.me/919899130707?text=Hi%2C%20I'm%20interested%20in%20${encodeURIComponent(property.title)}%20in%20${property.location}" 
@@ -200,42 +273,17 @@ function createPropertyCard(property) {
         </div>
     `;
     
-    // Add image navigation if multiple images
-    if (allImages.length > 1) {
-        const imgElement = card.querySelector('.property-img');
-        const prevBtn = card.querySelector('.prev-btn');
-        const nextBtn = card.querySelector('.next-btn');
-        const counter = card.querySelector('.image-counter');
-        
-        const updateImage = (direction) => {
-            if (direction === 'next') {
-                currentImageIndex = (currentImageIndex + 1) % allImages.length;
-            } else {
-                currentImageIndex = (currentImageIndex - 1 + allImages.length) % allImages.length;
-            }
-            imgElement.src = allImages[currentImageIndex];
-            if (counter) {
-                counter.textContent = `${currentImageIndex + 1}/${allImages.length}`;
-            }
-        };
-        
-        if (prevBtn) {
-            prevBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                updateImage('prev');
-            });
-        }
-        
-        if (nextBtn) {
-            nextBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                updateImage('next');
-            });
-        }
-    }
-    
     return card;
 }
+
+// Helper function to escape HTML and prevent XSS
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // Format price to Indian format
 function formatPrice(price) {
     return price.toLocaleString('en-IN');
@@ -243,9 +291,9 @@ function formatPrice(price) {
 
 // Property filters
 function filterProperties() {
-    const location = document.getElementById('locationFilter').value;
-    const type = document.getElementById('typeFilter').value;
-    const priceRange = document.getElementById('priceFilter').value;
+    const location = document.getElementById('locationFilter')?.value || '';
+    const type = document.getElementById('typeFilter')?.value || '';
+    const priceRange = document.getElementById('priceFilter')?.value || '';
     
     const filters = {};
     if (location) filters.location = location;
@@ -265,14 +313,16 @@ async function applyFilters(filters) {
     const propertyGrid = document.getElementById('propertyGrid');
     const loadingSpinner = document.getElementById('loadingSpinner');
     
+    if (!propertyGrid) return;
+    
     try {
-        loadingSpinner.style.display = 'block';
+        if (loadingSpinner) loadingSpinner.style.display = 'block';
         const properties = await fetchProperties(filters);
         displayProperties(properties, propertyGrid);
     } catch (error) {
         console.error('Error filtering properties:', error);
     } finally {
-        loadingSpinner.style.display = 'none';
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
     }
 }
 
@@ -280,6 +330,7 @@ async function applyFilters(filters) {
 function displaySampleProperties(container) {
     const sampleProperties = [
         {
+            _id: "sample1",
             title: '2BHK GDA Flat in Vaishali',
             price: 3500000,
             location: 'Ghaziabad',
@@ -287,9 +338,12 @@ function displaySampleProperties(container) {
             bedrooms: 2,
             bathrooms: 2,
             area: 850,
-            description: 'Beautiful GDA flat in prime location of Vaishali, near metro station'
+            description: 'Beautiful GDA flat in prime location of Vaishali, near metro station',
+            images: ['https://via.placeholder.com/800x600?text=Image+1'],
+            mainImage: 'https://via.placeholder.com/800x600?text=Main+Image'
         },
         {
+            _id: "sample2",
             title: '3BHK Builder Apartment Indirapuram',
             price: 7500000,
             location: 'Ghaziabad',
@@ -297,9 +351,12 @@ function displaySampleProperties(container) {
             bedrooms: 3,
             bathrooms: 3,
             area: 1450,
-            description: 'Luxurious builder apartment in Indirapuram with modern amenities'
+            description: 'Luxurious builder apartment in Indirapuram with modern amenities',
+            images: ['https://via.placeholder.com/800x600?text=Image+1'],
+            mainImage: 'https://via.placeholder.com/800x600?text=Main+Image'
         },
         {
+            _id: "sample3",
             title: '1BHK GDA Flat Raj Nagar',
             price: 1800000,
             location: 'Ghaziabad',
@@ -307,9 +364,12 @@ function displaySampleProperties(container) {
             bedrooms: 1,
             bathrooms: 1,
             area: 500,
-            description: 'Affordable GDA flat in Raj Nagar Extension, perfect for small families'
+            description: 'Affordable GDA flat in Raj Nagar Extension, perfect for small families',
+            images: ['https://via.placeholder.com/800x600?text=Image+1'],
+            mainImage: 'https://via.placeholder.com/800x600?text=Main+Image'
         },
         {
+            _id: "sample4",
             title: '2BHK Builder Floor in Dadri',
             price: 2500000,
             location: 'Dadri',
@@ -317,9 +377,12 @@ function displaySampleProperties(container) {
             bedrooms: 2,
             bathrooms: 2,
             area: 900,
-            description: 'Well-maintained builder floor near Greater Noida, good connectivity'
+            description: 'Well-maintained builder floor near Greater Noida, good connectivity',
+            images: ['https://via.placeholder.com/800x600?text=Image+1'],
+            mainImage: 'https://via.placeholder.com/800x600?text=Main+Image'
         },
         {
+            _id: "sample5",
             title: '3BHK Independent House Loni',
             price: 4500000,
             location: 'Loni',
@@ -327,9 +390,12 @@ function displaySampleProperties(container) {
             bedrooms: 3,
             bathrooms: 3,
             area: 1800,
-            description: 'Spacious independent house with parking and garden area'
+            description: 'Spacious independent house with parking and garden area',
+            images: ['https://via.placeholder.com/800x600?text=Image+1'],
+            mainImage: 'https://via.placeholder.com/800x600?text=Main+Image'
         },
         {
+            _id: "sample6",
             title: '2BHK GDA Flat Hapur',
             price: 1500000,
             location: 'Hapur',
@@ -337,7 +403,9 @@ function displaySampleProperties(container) {
             bedrooms: 2,
             bathrooms: 2,
             area: 750,
-            description: 'Budget-friendly GDA flat on NH-24, perfect for investment'
+            description: 'Budget-friendly GDA flat on NH-24, perfect for investment',
+            images: ['https://via.placeholder.com/800x600?text=Image+1'],
+            mainImage: 'https://via.placeholder.com/800x600?text=Main+Image'
         }
     ];
     
