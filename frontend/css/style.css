@@ -410,8 +410,7 @@ body {
     padding: 10px;
     font-size: 0.9rem;
 }
-
-/* === LOANS SECTION === */
+/* === LOANS SECTION - BLUE THEME === */
 .loans {
     padding: 5rem 0;
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -428,28 +427,101 @@ body {
     bottom: 0;
     background:
         radial-gradient(circle at 20% 80%, rgba(0, 61, 77, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(230, 164, 52, 0.03) 0%, transparent 50%);
+        radial-gradient(circle at 80% 20%, rgba(0, 61, 77, 0.03) 0%, transparent 50%);
     pointer-events: none;
 }
 
 .bank-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 2rem;
     margin-top: 3rem;
     perspective: 1000px;
 }
 
+/* Bank Card Base Styles */
 .bank-card {
     background: rgba(255, 255, 255, 0.95);
     padding: 2rem;
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
     text-align: center;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
 }
 
+/* Blue Glow Sweep Effect */
+.bank-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(0, 153, 255, 0.22),
+        transparent
+    );
+    transition: left 0.6s ease;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.bank-card:hover::before {
+    left: 100%;
+}
+
+/* Premium Blue Glow Hover Effect */
+.bank-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    border-color: #4da6ff;
+    box-shadow: 0 0 18px rgba(77, 166, 255, 0.45),
+                0 0 35px rgba(0, 122, 204, 0.25);
+    background: rgba(0, 122, 204, 0.08);
+}
+
+/* Intense Blue Flash on Click/Active */
+.bank-card:active {
+    transform: scale(0.98) rotate(-1deg);
+    box-shadow: 0 0 26px rgba(102, 189, 255, 0.95),
+                0 0 48px rgba(77, 166, 255, 0.65),
+                0 0 80px rgba(0, 122, 204, 0.35);
+    background: rgba(77, 166, 255, 0.12);
+    transition: all 0.1s ease;
+}
+
+/* Shine Sweep Effect on Hover */
+.bank-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.15) 50%,
+        transparent 70%
+    );
+    transform: rotate(45deg);
+    transition: all 0.6s ease;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.bank-card:hover::after {
+    opacity: 1;
+    transform: rotate(45deg) translate(50%, 50%);
+}
+
+/* Animation for cards appearing */
 .bank-card.animate-in {
     animation: cardPopIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
@@ -476,66 +548,19 @@ body {
 .bank-card:nth-child(2) { animation-delay: 0.25s; }
 .bank-card:nth-child(3) { animation-delay: 0.4s; }
 .bank-card:nth-child(4) { animation-delay: 0.55s; }
+.bank-card:nth-child(5) { animation-delay: 0.7s; }
+.bank-card:nth-child(6) { animation-delay: 0.85s; }
 
-.bank-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        120deg,
-        transparent,
-        rgba(0, 153, 255, 0.15),
-        transparent
-    );
-    transition: left 0.6s ease;
-    z-index: 0;
-    pointer-events: none;
+/* Make content stay above pseudo-elements */
+.bank-logo-container,
+.bank-card h3,
+.bank-card > p,
+.bank-card ul {
+    position: relative;
+    z-index: 1;
 }
 
-.bank-card:hover::before {
-    left: 100%;
-}
-
-.bank-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-    border-color: rgba(0, 61, 77, 0.1);
-}
-
-.bank-card:active {
-    transform: scale(0.98) rotate(-1deg);
-    transition: all 0.1s ease;
-}
-
-.bank-card::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(
-        45deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.1) 50%,
-        transparent 70%
-    );
-    transform: rotate(45deg);
-    transition: all 0.6s ease;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.bank-card:hover::after {
-    opacity: 1;
-    transform: rotate(45deg) translate(50%, 50%);
-}
-
-
+/* Bank Logo Container */
 .bank-logo-container {
     width: 120px;
     height: 80px;
@@ -550,17 +575,22 @@ body {
 }
 
 .bank-card:hover .bank-logo-container {
-    transform: scale(1.1) rotate(-5deg);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
+
+.bank-logo-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: brightness(1) contrast(1);
+    transition: filter 0.3s ease;
+}
+
 .bank-card:hover .bank-logo-img {
     filter: brightness(1.05) contrast(1.05);
 }
 
-.bank-logo-img {
-    filter: brightness(1) contrast(1);
-    transition: filter 0.3s ease;
-}
 .bank-logo-fallback {
     display: none;
     font-size: 1.8rem;
@@ -571,34 +601,81 @@ body {
     justify-content: center;
 }
 
+/* Bank-specific fallback logo colors */
 .bank-card[data-bank="hdfc"] .bank-logo-fallback { color: #004B8D; }
 .bank-card[data-bank="icici"] .bank-logo-fallback { color: #F15A29; }
+.bank-card[data-bank="sbi"] .bank-logo-fallback { color: #2E6A9E; }
 .bank-card[data-bank="piramal"] .bank-logo-fallback { color: #003d4d; }
 .bank-card[data-bank="indian"] .bank-logo-fallback { color: #1E5F47; }
+.bank-card[data-bank="bob"] .bank-logo-fallback { color: #1F2A5E; }
 
+/* Bank Card Typography */
 .bank-card h3 {
     font-size: 1.3rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
     color: #1a1a1a;
+    transition: color 0.3s ease;
+}
+
+.bank-card:hover h3 {
+    color: var(--primary);
 }
 
 .bank-card > p {
-    color: #003d4d;
+    color: var(--primary);
     font-weight: 600;
     font-size: 0.9rem;
     margin-bottom: 1rem;
 }
 
+/* Bank Card List Styles */
 .bank-card ul {
-    text-align: left;
+    list-style: none;
     margin-top: 1rem;
+    text-align: left;
 }
+
+.bank-card ul li {
+    padding: 0.4rem 0;
+    font-size: 0.85rem;
+    color: #4a5568;
+    position: relative;
+    padding-left: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.bank-card ul li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.bank-card:hover ul li {
+    transform: translateX(3px);
+    color: var(--dark);
+}
+
+.bank-card:hover ul li:before {
+    color: #4da6ff;
+    transform: scale(1.1);
+}
+
+/* Bank-specific border colors on hover */
 .bank-card[data-bank="hdfc"]:hover {
     border-bottom: 3px solid #004B8D;
 }
+
 .bank-card[data-bank="icici"]:hover {
     border-bottom: 3px solid #F15A29;
+}
+
+.bank-card[data-bank="sbi"]:hover {
+    border-bottom: 3px solid #2E6A9E;
 }
 
 .bank-card[data-bank="piramal"]:hover {
@@ -609,27 +686,11 @@ body {
     border-bottom: 3px solid #1E5F47;
 }
 
-.bank-card ul li:hover {
-    transform: translateX(5px);
-    color: var(--dark);
-}
-.bank-card ul li {
-    padding: 0.4rem 0;
-    font-size: 0.85rem;
-    color: #4a5568;
-    position: relative;
-    padding-left: 1.5rem;
+.bank-card[data-bank="bob"]:hover {
+    border-bottom: 3px solid #1F2A5E;
 }
 
-.bank-card ul li:before {
-    content: "✓";
-    position: absolute;
-    left: 0;
-    color: #003d4d;
-    font-weight: bold;
-    font-size: 0.9rem;
-}
-
+/* Loan CTA Section */
 .loan-cta {
     text-align: center;
     margin-top: 4rem;
