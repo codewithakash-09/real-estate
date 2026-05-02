@@ -158,6 +158,10 @@
 <div class="form-group">
     <label>Main Image URL (Cover Photo)</label>
     <input type="text" id="mainImage" placeholder="https://example.com/main-image.jpg">
+    <button type="button" onclick="previewMainImage()" class="btn btn-sm btn-secondary" style="margin-top: 5px;">Preview Image</button>
+<div id="mainImagePreview" style="margin-top: 10px; display: none;">
+        <img id="mainImagePreviewImg" src="" alt="Preview" style="max-width: 200px; border-radius: 8px;">
+    </div>
 </div>
 
 <div class="form-group">
