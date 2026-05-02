@@ -955,22 +955,22 @@ body {
 
 .bank-card[data-bank="hdfc"],
 .bank-card.hdfc {
-    background-image: url('/images/hdfc.jpg');
+    background-image: url('https://static.vecteezy.com/system/resources/previews/020/190/432/non_2x/hdfc-logo-hdfc-icon-free-free-vector.jpg');
 }
 
 .bank-card[data-bank="icici"],
 .bank-card.icici {
-    background-image: url('/images/icici.jpg');
+    background-image: url('https://tradebrains.in/features/wp-content/uploads/2021/09/ICICI-Bank--1080x675.jpg');
 }
 
 .bank-card[data-bank="piramal"],
 .bank-card.piramal {
-    background-image: url('/images/piramal.jpg');
+    background-image: url('https://currentaffairs.adda247.com/wp-content/uploads/multisite/sites/5/2023/07/06161842/Piramal-Finance-opens-first-all-women-branch-in-Kochi.jpg');
 }
 
 .bank-card[data-bank="indian"],
 .bank-card.indian {
-    background-image: url('/images/indianbank.jpg');
+    background-image: url('https://timesofindia.indiatimes.com/photo/59385226.cms');
 }
 
 .bank-card[data-bank="sbi"],
