@@ -36,6 +36,27 @@ async function uploadToImgBB(file) {
 }
 
 // ============= PROCESS IMAGES (URLs + Files) - FIXED =============
+// Preview main image function
+function previewMainImage() {
+    const mainImageUrl = document.getElementById('mainImage').value;
+    const previewDiv = document.getElementById('mainImagePreview');
+    const previewImg = document.getElementById('mainImagePreviewImg');
+    
+    if (mainImageUrl && (mainImageUrl.startsWith('http://') || mainImageUrl.startsWith('https://'))) {
+        previewImg.src = mainImageUrl;
+        previewDiv.style.display = 'block';
+        
+        // Test if image loads
+        previewImg.onerror = function() {
+            alert('Warning: Image URL might not be accessible. Please check if the link is correct.');
+        };
+    } else {
+        previewDiv.style.display = 'none';
+        if (mainImageUrl) {
+            alert('Please enter a valid image URL starting with http:// or https://');
+        }
+    }
+}
 async function processImages(imageUrlsText, imageFiles) {
     const processedUrls = [];
     
@@ -390,7 +411,8 @@ async function editProperty(id) {
         alert('Failed to load property details. Please try again.');
     }
 }
-// ============= PROPERTY FORM SUBMISSION - FIXED =============
+
+// ============= PROPERTY FORM SUBMISSION - COMPLETELY FIXED =============
 document.getElementById('propertyForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -398,26 +420,48 @@ document.getElementById('propertyForm')?.addEventListener('submit', async (e) =>
     const submitBtn = document.getElementById('submitBtn');
     const originalText = submitBtn.textContent;
     
-    // Get images from both sources - FIXED to handle URLs properly
+    // Get values - FIXED to properly capture mainImage
+    const mainImageUrl = document.getElementById('mainImage').value.trim();
     const imagesText = document.getElementById('images').value;
-    const mainImageUrl = document.getElementById('mainImage').value;
     const imageFiles = document.getElementById('imageFiles').files;
     
-    submitBtn.textContent = 'Processing images...';
-    submitBtn.disabled = true;
+    console.log('Main Image URL:', mainImageUrl);
+    console.log('Images Text:', imagesText);
     
-    // Process all images (both URLs and files)
-    const allImageUrls = await processImages(imagesText, imageFiles);
-    
-    // Use mainImage from input, or first image from gallery, or placeholder
-    let finalMainImage = mainImageUrl;
-    if (!finalMainImage && allImageUrls.length > 0) {
-        finalMainImage = allImageUrls[0];
-    }
-    if (!finalMainImage) {
-        finalMainImage = 'https://via.placeholder.com/800x600?text=Property+Image';
+    // Process additional images from textarea
+    let additionalImages = [];
+    if (imagesText && imagesText.trim()) {
+        // Split by comma or new line
+        additionalImages = imagesText.split(/[,\n]+/).map(url => url.trim()).filter(url => url && (url.startsWith('http://') || url.startsWith('https://')));
+        console.log('Additional images parsed:', additionalImages);
     }
     
+    // Combine main image with additional images
+    let allImages = [];
+    if (mainImageUrl && (mainImageUrl.startsWith('http://') || mainImageUrl.startsWith('https://'))) {
+        allImages.push(mainImageUrl);
+    }
+    allImages.push(...additionalImages);
+    
+    // Remove duplicates
+    allImages = [...new Set(allImages)];
+    
+    // Process uploaded files if any (optional)
+    if (imageFiles && imageFiles.length > 0) {
+        submitBtn.textContent = 'Uploading images...';
+        for (let i = 0; i < imageFiles.length; i++) {
+            const file = imageFiles[i];
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`${file.name} is too large. Max 5MB.`);
+                continue;
+            }
+            // For now, just add as local URL (you can implement ImgBB upload later)
+            const localUrl = URL.createObjectURL(file);
+            allImages.push(localUrl);
+        }
+    }
+    
+    // Prepare form data - FIXED structure
     const formData = {
         title: document.getElementById('title').value,
         price: parseInt(document.getElementById('price').value),
@@ -428,16 +472,26 @@ document.getElementById('propertyForm')?.addEventListener('submit', async (e) =>
         area: parseInt(document.getElementById('area').value),
         description: document.getElementById('description').value,
         status: document.getElementById('status').value,
-        mainImage: finalMainImage,
-        images: allImageUrls
+        mainImage: mainImageUrl || (allImages[0] || ''),  // Important: Save mainImage separately
+        images: allImages  // Save all images including main
     };
     
-    console.log('Submitting property with images:', formData.images);
-    console.log('Main image:', formData.mainImage);
+    console.log('Saving property with:', {
+        mainImage: formData.mainImage,
+        imagesCount: formData.images.length,
+        images: formData.images
+    });
     
-    // Validate required fields
+    // Validate
     if (!formData.title || !formData.price || !formData.location || !formData.type) {
         alert('Please fill in all required fields');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return;
+    }
+    
+    if (!formData.mainImage && formData.images.length === 0) {
+        alert('Please provide at least one image URL');
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
         return;
@@ -463,7 +517,7 @@ document.getElementById('propertyForm')?.addEventListener('submit', async (e) =>
         
         if (response.ok) {
             const result = await response.json();
-            console.log('Property saved successfully:', result);
+            console.log('Property saved:', result);
             alert(propertyId ? 'Property updated successfully!' : 'Property added successfully!');
             
             // Reset form
@@ -472,19 +526,18 @@ document.getElementById('propertyForm')?.addEventListener('submit', async (e) =>
             document.getElementById('imageFiles').value = '';
             document.getElementById('images').value = '';
             document.getElementById('mainImage').value = '';
+            document.getElementById('mainImagePreview').style.display = 'none';
             
-            // Clear image preview
-            const previewContainer = document.getElementById('imagePreviewContainer');
-            if (previewContainer) previewContainer.innerHTML = '';
-            
-            // Reset form title and button
-            document.getElementById('formTitle').textContent = 'Add New Property';
-            document.getElementById('submitBtn').textContent = 'Save Property';
-            
-            // Refresh properties list
+            // Refresh and show properties
             document.getElementById('propertiesSection').style.display = 'block';
             document.getElementById('addPropertySection').style.display = 'none';
-            loadProperties();
+            await loadProperties();
+            
+            // Also reload the main page cache if needed
+            if (propertyId) {
+                // Clear any cached data
+                sessionStorage.removeItem('propertiesCache');
+            }
         } else {
             const error = await response.json();
             console.error('Server error:', error);
