@@ -1,7 +1,84 @@
 const API_BASE_URL = '/api';
 let authToken = localStorage.getItem('authToken');
 
-// Check authentication on load
+// ============= IMGBB CONFIGURATION =============
+// Get your free API key from: https://api.imgbb.com/
+const IMGBB_API_KEY = window.IMGBB_API_KEY || 'YOUR_API_KEY_HERE';// REPLACE WITH YOUR ACTUAL API KEY
+
+// ============= IMGBB UPLOAD FUNCTION =============
+async function uploadToImgBB(file) {
+    const formData = new FormData();
+    formData.append('key', IMGBB_API_KEY);
+    formData.append('image', file);
+    
+    try {
+        const response = await fetch('https://api.imgbb.com/1/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            return {
+                success: true,
+                url: result.data.url,
+                display_url: result.data.display_url,
+                delete_url: result.data.delete_url
+            };
+        } else {
+            throw new Error(result.error?.message || 'Upload failed');
+        }
+    } catch (error) {
+        console.error('ImgBB upload error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ============= PROCESS IMAGES (URLs + Files) =============
+async function processImages(imageUrlsText, imageFiles) {
+    const processedUrls = [];
+    
+    // 1. Process URL-based images from textarea
+    if (imageUrlsText && imageUrlsText.trim()) {
+        const urls = imageUrlsText.split(',').map(url => url.trim()).filter(url => url);
+        for (const url of urls) {
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+                processedUrls.push(url);
+            }
+        }
+    }
+    
+    // 2. Upload files to ImgBB
+    if (imageFiles && imageFiles.length > 0) {
+        for (let i = 0; i < imageFiles.length; i++) {
+            const file = imageFiles[i];
+            
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`${file.name} is too large. Max 5MB.`);
+                continue;
+            }
+            
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert(`${file.name} is not an image.`);
+                continue;
+            }
+            
+            const result = await uploadToImgBB(file);
+            if (result.success) {
+                processedUrls.push(result.url);
+            } else {
+                alert(`Failed to upload ${file.name}: ${result.error}`);
+            }
+        }
+    }
+    
+    return processedUrls;
+}
+
+// ============= CHECK AUTHENTICATION =============
 document.addEventListener('DOMContentLoaded', () => {
     if (authToken) {
         showDashboard();
@@ -9,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Login
+// ============= LOGIN =============
 document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -41,13 +118,12 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     }
 });
 
-// Show dashboard
+// ============= DASHBOARD FUNCTIONS =============
 function showDashboard() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashboardScreen').style.display = 'flex';
 }
 
-// Show section
 function showSection(section) {
     console.log('Showing section:', section);
     
@@ -92,7 +168,6 @@ function showSection(section) {
     }
 }
 
-// Logout
 function logout() {
     localStorage.removeItem('authToken');
     authToken = null;
@@ -100,7 +175,7 @@ function logout() {
     document.getElementById('dashboardScreen').style.display = 'none';
 }
 
-// Load properties
+// ============= LOAD PROPERTIES =============
 async function loadProperties() {
     try {
         const response = await fetch(`${API_BASE_URL}/properties`);
@@ -119,9 +194,9 @@ async function loadProperties() {
                 <td>${property.type}</td>
                 <td><span class="status-badge status-${property.status.toLowerCase().replace(' ', '-')}">${property.status}</span></td>
                 <td>
-<button class="btn btn-sm btn-edit" onclick="editProperty('${property._id}')">Edit</button>
+                    <button class="btn btn-sm btn-edit" onclick="editProperty('${property._id}')">Edit</button>
                     <button class="btn btn-sm btn-delete" onclick="deleteProperty('${property._id}')">Delete</button>
-                 </td>
+                </td>
             `;
             tbody.appendChild(tr);
         });
@@ -130,7 +205,7 @@ async function loadProperties() {
     }
 }
 
-// Load leads
+// ============= LOAD LEADS =============
 async function loadLeads() {
     try {
         const response = await fetch(`${API_BASE_URL}/leads`, {
@@ -152,7 +227,7 @@ async function loadLeads() {
                 <td><span class="status-badge status-${lead.status}">${lead.status}</span></td>
                 <td>
                     <button class="btn btn-sm btn-status" onclick="updateLeadStatus('${lead._id}', 'contacted')">Mark Contacted</button>
-                 </td>
+                </td>
             `;
             tbody.appendChild(tr);
         });
@@ -166,7 +241,7 @@ async function loadLeads() {
     }
 }
 
-// Update lead status
+// ============= UPDATE LEAD STATUS =============
 async function updateLeadStatus(id, status) {
     try {
         const response = await fetch(`${API_BASE_URL}/leads/${id}`, {
@@ -188,7 +263,7 @@ async function updateLeadStatus(id, status) {
     }
 }
 
-// Delete property
+// ============= DELETE PROPERTY =============
 async function deleteProperty(id) {
     if (!confirm('Are you sure you want to delete this property?')) return;
     
@@ -210,34 +285,7 @@ async function deleteProperty(id) {
     }
 }
 
-// ============= IMAGE UPLOAD FUNCTIONS =============
-
-async function uploadImages(files) {
-    const uploadedUrls = [];
-    
-    for (let file of files) {
-        if (file.size > 5 * 1024 * 1024) {
-            alert(`${file.name} is too large. Max 5MB.`);
-            continue;
-        }
-        
-        if (!file.type.startsWith('image/')) {
-            alert(`${file.name} is not an image.`);
-            continue;
-        }
-        
-        const imageUrl = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.readAsDataURL(file);
-        });
-        
-        uploadedUrls.push(imageUrl);
-    }
-    
-    return uploadedUrls;
-}
-
+// ============= IMAGE PREVIEW FUNCTION =============
 function createPreviewContainer() {
     let container = document.getElementById('imagePreviewContainer');
     if (!container) {
@@ -250,6 +298,7 @@ function createPreviewContainer() {
     return container;
 }
 
+// Image preview on file selection
 document.getElementById('imageFiles')?.addEventListener('change', function(e) {
     const files = Array.from(e.target.files);
     const previewContainer = createPreviewContainer();
@@ -271,90 +320,7 @@ document.getElementById('imageFiles')?.addEventListener('change', function(e) {
     });
 });
 
-// ============= PROPERTY FORM SUBMISSION =============
-document.getElementById('propertyForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const propertyId = document.getElementById('propertyId').value;
-    const submitBtn = document.getElementById('submitBtn');
-    const originalText = submitBtn.textContent;
-    
-    const imageFiles = document.getElementById('imageFiles')?.files;
-    let uploadedImages = [];
-    
-    if (imageFiles && imageFiles.length > 0) {
-        submitBtn.textContent = 'Uploading Images...';
-        submitBtn.disabled = true;
-        uploadedImages = await uploadImages(Array.from(imageFiles));
-    }
-    
-    const imagesText = document.getElementById('images').value;
-    const existingImages = imagesText ? imagesText.split(',').map(url => url.trim()).filter(url => url) : [];
-    const allImages = [...existingImages, ...uploadedImages];
-    const mainImage = document.getElementById('mainImage').value || (allImages[0] || '');
-    
-    const formData = {
-        title: document.getElementById('title').value,
-        price: parseInt(document.getElementById('price').value),
-        location: document.getElementById('location').value,
-        type: document.getElementById('type').value,
-        bedrooms: parseInt(document.getElementById('bedrooms').value),
-        bathrooms: parseInt(document.getElementById('bathrooms').value),
-        area: parseInt(document.getElementById('area').value),
-        description: document.getElementById('description').value,
-        status: document.getElementById('status').value,
-        mainImage: mainImage,
-        images: allImages
-    };
-    
-    if (!formData.title || !formData.price || !formData.location || !formData.type) {
-        alert('Please fill in all required fields');
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-        return;
-    }
-    
-    try {
-        const url = propertyId 
-            ? `${API_BASE_URL}/properties/${propertyId}`
-            : `${API_BASE_URL}/properties`;
-        
-        const method = propertyId ? 'PUT' : 'POST';
-        
-        submitBtn.textContent = 'Saving...';
-        submitBtn.disabled = true;
-        
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify(formData)
-        });
-        
-        if (response.ok) {
-            alert(propertyId ? 'Property updated successfully!' : 'Property added successfully!');
-            showSection('properties');
-            loadProperties();
-            document.getElementById('propertyForm').reset();
-            document.getElementById('propertyId').value = '';
-            const previewContainer = document.getElementById('imagePreviewContainer');
-            if (previewContainer) previewContainer.innerHTML = '';
-        } else {
-            const error = await response.json();
-            alert(error.message || 'Failed to save property');
-        }
-    } catch (error) {
-        console.error('Error saving property:', error);
-        alert('Error saving property. Please check your connection.');
-    } finally {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-    }
-});
-
-/// ============= EDIT PROPERTY =============
+// ============= EDIT PROPERTY =============
 async function editProperty(id) {
     console.log('Edit button clicked for property ID:', id);
     
@@ -414,3 +380,95 @@ async function editProperty(id) {
         alert('Failed to load property details. Please try again.');
     }
 }
+
+// ============= PROPERTY FORM SUBMISSION (WITH IMGBB UPLOAD) =============
+document.getElementById('propertyForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const propertyId = document.getElementById('propertyId').value;
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.textContent;
+    
+    // Get images from both sources
+    const imagesText = document.getElementById('images').value;
+    const imageFiles = document.getElementById('imageFiles').files;
+    
+    submitBtn.textContent = 'Processing images...';
+    submitBtn.disabled = true;
+    
+    // Process all images (both URLs and files) using ImgBB
+    const allImageUrls = await processImages(imagesText, imageFiles);
+    const mainImage = document.getElementById('mainImage').value || (allImageUrls[0] || '');
+    
+    const formData = {
+        title: document.getElementById('title').value,
+        price: parseInt(document.getElementById('price').value),
+        location: document.getElementById('location').value,
+        type: document.getElementById('type').value,
+        bedrooms: parseInt(document.getElementById('bedrooms').value),
+        bathrooms: parseInt(document.getElementById('bathrooms').value),
+        area: parseInt(document.getElementById('area').value),
+        description: document.getElementById('description').value,
+        status: document.getElementById('status').value,
+        mainImage: mainImage,
+        images: allImageUrls
+    };
+    
+    // Validate required fields
+    if (!formData.title || !formData.price || !formData.location || !formData.type) {
+        alert('Please fill in all required fields');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return;
+    }
+    
+    try {
+        const url = propertyId 
+            ? `${API_BASE_URL}/properties/${propertyId}`
+            : `${API_BASE_URL}/properties`;
+        
+        const method = propertyId ? 'PUT' : 'POST';
+        
+        submitBtn.textContent = 'Saving property...';
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+            alert(propertyId ? 'Property updated successfully!' : 'Property added successfully!');
+            
+            // Reset form
+            document.getElementById('propertyForm').reset();
+            document.getElementById('propertyId').value = '';
+            document.getElementById('imageFiles').value = '';
+            
+            // Clear image preview
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            if (previewContainer) previewContainer.innerHTML = '';
+            
+            // Reset form title and button
+            document.getElementById('formTitle').textContent = 'Add New Property';
+            document.getElementById('submitBtn').textContent = 'Save Property';
+            
+            // Refresh properties list
+            document.getElementById('propertiesSection').style.display = 'block';
+            document.getElementById('addPropertySection').style.display = 'none';
+            loadProperties();
+        } else {
+            const error = await response.json();
+            alert(error.message || 'Failed to save property');
+        }
+    } catch (error) {
+        console.error('Error saving property:', error);
+        alert('Error saving property: ' + error.message);
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+});
