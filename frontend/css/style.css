@@ -1062,14 +1062,14 @@ body {
     right: 30px;
     width: 60px;
     height: 60px;
-    background: var(--success);
+    background: #25D366;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
     box-shadow: 0 5px 25px rgba(37, 211, 102, 0.4);
-    transition: var(--transition);
+    transition: all 0.3s ease;
     z-index: 1000;
     animation: float 3s ease-in-out infinite;
 }
@@ -1078,6 +1078,16 @@ body {
     transform: scale(1.1);
     box-shadow: 0 8px 30px rgba(37, 211, 102, 0.6);
 }
+
+.whatsapp-float i,
+.whatsapp-float svg {
+    font-size: 32px;
+    color: white;
+    width: 32px;
+    height: 32px;
+}
+
+
 
 .whatsapp-icon {
     font-size: 1.8rem;
