@@ -86,90 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
-    // Setup image navigation
-    setupGlobalImageNavigation();
 });
-
-// Global image navigation setup
-function setupGlobalImageNavigation() {
-    document.addEventListener('click', function(e) {
-        // Handle previous button
-        if (e.target.classList && e.target.classList.contains('prev-btn')) {
-            e.stopPropagation();
-            e.preventDefault();
-            const card = e.target.closest('.property-card');
-            if (card) {
-                changeImage(card, -1);
-            }
-        }
-        
-        // Handle next button
-        if (e.target.classList && e.target.classList.contains('next-btn')) {
-            e.stopPropagation();
-            e.preventDefault();
-            const card = e.target.closest('.property-card');
-            if (card) {
-                changeImage(card, 1);
-            }
-        }
-    });
-}
-
-// Function to change image
-function changeImage(card, direction) {
-    const images = JSON.parse(card.getAttribute('data-images') || '[]');
-    let currentIndex = parseInt(card.getAttribute('data-current-index') || '0');
-    const totalImages = images.length;
-    
-    if (totalImages === 0) return;
-    
-    // Calculate new index
-    let newIndex = currentIndex + direction;
-    if (newIndex < 0) newIndex = totalImages - 1;
-    if (newIndex >= totalImages) newIndex = 0;
-    
-    // Update the main image
-    const imgElement = card.querySelector('.property-img');
-    if (imgElement) {
-        imgElement.src = images[newIndex];
-    }
-    
-    // Update counter
-    const counter = card.querySelector('.image-counter');
-    if (counter) {
-        counter.textContent = `${newIndex + 1}/${totalImages}`;
-    }
-    
-    // Update dots
-    const dots = card.querySelectorAll('.dot');
-    if (dots.length > 0) {
-        dots.forEach((dot, idx) => {
-            if (idx === newIndex) {
-                dot.style.background = 'white';
-                dot.classList.add('active');
-            } else {
-                dot.style.background = 'rgba(255,255,255,0.5)';
-                dot.classList.remove('active');
-            }
-        });
-    }
-    
-    // Update thumbnails
-    const thumbnails = card.querySelectorAll('.thumbnail');
-    if (thumbnails.length > 0) {
-        thumbnails.forEach((thumb, idx) => {
-            if (idx === newIndex) {
-                thumb.classList.add('active');
-            } else {
-                thumb.classList.remove('active');
-            }
-        });
-    }
-    
-    // Save new index
-    card.setAttribute('data-current-index', newIndex);
-}
 
 // Load and display properties
 async function loadProperties() {
@@ -295,95 +212,117 @@ function createPropertyCard(property) {
         </div>
     `;
     
-    // Add click handlers for thumbnails
+    // Add event listeners if multiple images
     if (hasMultipleImages) {
+        // Previous button
+        const prevBtn = card.querySelector('.prev-btn');
+        if (prevBtn) {
+            prevBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                changeImage(card, -1);
+            });
+        }
+        
+        // Next button
+        const nextBtn = card.querySelector('.next-btn');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                changeImage(card, 1);
+            });
+        }
+        
+        // Thumbnails
         const thumbnails = card.querySelectorAll('.thumbnail');
         thumbnails.forEach((thumb, idx) => {
             thumb.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const images = JSON.parse(card.getAttribute('data-images'));
-                const imgElement = card.querySelector('.property-img');
-                const counter = card.querySelector('.image-counter');
-                const dots = card.querySelectorAll('.dot');
-                const allThumbnails = card.querySelectorAll('.thumbnail');
-                
-                // Update image
-                imgElement.src = images[idx];
-                
-                // Update counter
-                if (counter) counter.textContent = `${idx + 1}/${images.length}`;
-                
-                // Update dots
-                dots.forEach((dot, i) => {
-                    if (i === idx) {
-                        dot.style.background = 'white';
-                        dot.classList.add('active');
-                    } else {
-                        dot.style.background = 'rgba(255,255,255,0.5)';
-                        dot.classList.remove('active');
-                    }
-                });
-                
-                // Update thumbnails
-                allThumbnails.forEach((thumbEl, i) => {
-                    if (i === idx) {
-                        thumbEl.classList.add('active');
-                        thumbEl.style.borderColor = '#4da6ff';
-                    } else {
-                        thumbEl.classList.remove('active');
-                        thumbEl.style.borderColor = 'transparent';
-                    }
-                });
-                
-                card.setAttribute('data-current-index', idx);
+                goToImage(card, idx);
             });
         });
         
-        // Add click handlers for dots
+        // Dots
         const dots = card.querySelectorAll('.dot');
         dots.forEach((dot, idx) => {
             dot.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const images = JSON.parse(card.getAttribute('data-images'));
-                const imgElement = card.querySelector('.property-img');
-                const counter = card.querySelector('.image-counter');
-                const allDots = card.querySelectorAll('.dot');
-                const thumbnails = card.querySelectorAll('.thumbnail');
-                
-                // Update image
-                imgElement.src = images[idx];
-                
-                // Update counter
-                if (counter) counter.textContent = `${idx + 1}/${images.length}`;
-                
-                // Update dots
-                allDots.forEach((dotEl, i) => {
-                    if (i === idx) {
-                        dotEl.style.background = 'white';
-                        dotEl.classList.add('active');
-                    } else {
-                        dotEl.style.background = 'rgba(255,255,255,0.5)';
-                        dotEl.classList.remove('active');
-                    }
-                });
-                
-                // Update thumbnails
-                thumbnails.forEach((thumbEl, i) => {
-                    if (i === idx) {
-                        thumbEl.classList.add('active');
-                        thumbEl.style.borderColor = '#4da6ff';
-                    } else {
-                        thumbEl.classList.remove('active');
-                        thumbEl.style.borderColor = 'transparent';
-                    }
-                });
-                
-                card.setAttribute('data-current-index', idx);
+                goToImage(card, idx);
             });
         });
     }
     
     return card;
+}
+
+// Function to change image (next/prev)
+function changeImage(card, direction) {
+    const images = JSON.parse(card.getAttribute('data-images'));
+    let currentIndex = parseInt(card.getAttribute('data-current-index') || '0');
+    const totalImages = images.length;
+    
+    let newIndex = currentIndex + direction;
+    if (newIndex < 0) newIndex = totalImages - 1;
+    if (newIndex >= totalImages) newIndex = 0;
+    
+    updateCardImage(card, newIndex);
+}
+
+// Function to go to specific image
+function goToImage(card, index) {
+    updateCardImage(card, index);
+}
+
+// Update card image and UI
+function updateCardImage(card, newIndex) {
+    const images = JSON.parse(card.getAttribute('data-images'));
+    const totalImages = images.length;
+    
+    // Update main image
+    const imgElement = card.querySelector('.property-img');
+    if (imgElement) {
+        imgElement.style.opacity = '0.5';
+        imgElement.src = images[newIndex];
+        imgElement.onload = () => {
+            imgElement.style.opacity = '1';
+        };
+    }
+    
+    // Update counter
+    const counter = card.querySelector('.image-counter');
+    if (counter) {
+        counter.textContent = `${newIndex + 1}/${totalImages}`;
+        counter.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+            counter.style.transform = 'scale(1)';
+        }, 200);
+    }
+    
+    // Update dots
+    const dots = card.querySelectorAll('.dot');
+    dots.forEach((dot, idx) => {
+        if (idx === newIndex) {
+            dot.style.background = 'white';
+            dot.classList.add('active');
+        } else {
+            dot.style.background = 'rgba(255,255,255,0.5)';
+            dot.classList.remove('active');
+        }
+    });
+    
+    // Update thumbnails
+    const thumbnails = card.querySelectorAll('.thumbnail');
+    thumbnails.forEach((thumb, idx) => {
+        if (idx === newIndex) {
+            thumb.classList.add('active');
+            thumb.style.borderColor = '#4da6ff';
+        } else {
+            thumb.classList.remove('active');
+            thumb.style.borderColor = 'transparent';
+        }
+    });
+    
+    // Save new index
+    card.setAttribute('data-current-index', newIndex);
 }
 
 function escapeHtml(text) {
@@ -445,11 +384,10 @@ function displaySampleProperties(container) {
             area: 850,
             description: 'Beautiful GDA flat in prime location of Vaishali, near metro station',
             images: [
-                'https://via.placeholder.com/800x600?text=Image+1',
-                'https://via.placeholder.com/800x600?text=Image+2',
-                'https://via.placeholder.com/800x600?text=Image+3'
-            ],
-            mainImage: 'https://via.placeholder.com/800x600?text=Main+Image'
+                'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
+                'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500',
+                'https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=500'
+            ]
         },
         {
             _id: "sample2",
@@ -462,10 +400,68 @@ function displaySampleProperties(container) {
             area: 1450,
             description: 'Luxurious builder apartment in Indirapuram with modern amenities',
             images: [
-                'https://via.placeholder.com/800x600?text=Image+1',
-                'https://via.placeholder.com/800x600?text=Image+2'
-            ],
-            mainImage: 'https://via.placeholder.com/800x600?text=Main+Image'
+                'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
+                'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500'
+            ]
+        },
+        {
+            _id: "sample3",
+            title: '1BHK GDA Flat Raj Nagar',
+            price: 1800000,
+            location: 'Ghaziabad',
+            type: 'GDA Flat',
+            bedrooms: 1,
+            bathrooms: 1,
+            area: 500,
+            description: 'Affordable GDA flat in Raj Nagar Extension',
+            images: [
+                'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'
+            ]
+        },
+        {
+            _id: "sample4",
+            title: '2BHK Builder Floor in Dadri',
+            price: 2500000,
+            location: 'Dadri',
+            type: 'Builder Flat',
+            bedrooms: 2,
+            bathrooms: 2,
+            area: 900,
+            description: 'Well-maintained builder floor near Greater Noida',
+            images: [
+                'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
+                'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500',
+                'https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=500'
+            ]
+        },
+        {
+            _id: "sample5",
+            title: '3BHK Independent House Loni',
+            price: 4500000,
+            location: 'Loni',
+            type: 'Builder Flat',
+            bedrooms: 3,
+            bathrooms: 3,
+            area: 1800,
+            description: 'Spacious independent house with parking',
+            images: [
+                'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
+                'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500'
+            ]
+        },
+        {
+            _id: "sample6",
+            title: '2BHK GDA Flat Hapur',
+            price: 1500000,
+            location: 'Hapur',
+            type: 'GDA Flat',
+            bedrooms: 2,
+            bathrooms: 2,
+            area: 750,
+            description: 'Budget-friendly GDA flat on NH-24',
+            images: [
+                'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'
+            ]
         }
     ];
     
