@@ -309,3 +309,75 @@ function add3DTiltEffect() {
         });
     });
 }
+// ============= YELLOW GLOW SPARKLE EFFECTS =============
+document.addEventListener('DOMContentLoaded', () => {
+    // Add sparkles to all section titles
+    const sectionTitles = document.querySelectorAll('.section-title, .hero-title');
+    
+    sectionTitles.forEach(title => {
+        // Set relative position for sparkle container
+        title.style.position = 'relative';
+        
+        // Create sparkle container
+        const sparkleContainer = document.createElement('div');
+        sparkleContainer.className = 'sparkle-container';
+        title.appendChild(sparkleContainer);
+        
+        // Create sparkles
+        createSparkles(sparkleContainer);
+        
+        // Recreate sparkles periodically
+        setInterval(() => createSparkles(sparkleContainer), 3000);
+    });
+    
+    function createSparkles(container) {
+        // Remove old sparkles
+        container.innerHTML = '';
+        
+        // Create new sparkles
+        for (let i = 0; i < 15; i++) {
+            setTimeout(() => {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.animationDuration = (1 + Math.random() * 2) + 's';
+                sparkle.style.animationDelay = Math.random() * 1 + 's';
+                
+                container.appendChild(sparkle);
+                
+                // Remove sparkle after animation
+                setTimeout(() => {
+                    if (sparkle.parentNode) {
+                        sparkle.remove();
+                    }
+                }, 3000);
+            }, i * 100);
+        }
+    }
+    
+    // GSAP Animation for section titles
+    gsap.utils.toArray('.section-title').forEach(title => {
+        gsap.from(title, {
+            scrollTrigger: {
+                trigger: title,
+                start: 'top 85%',
+                toggleActions: 'play none none none'
+            },
+            opacity: 0,
+            y: 30,
+            scale: 0.9,
+            duration: 1,
+            ease: 'back.out(1.7)',
+            onComplete: () => {
+                // Add intense glow on reveal
+                gsap.to(title, {
+                    textShadow: '0 0 15px rgba(230, 164, 52, 0.9), 0 0 30px rgba(230, 164, 52, 0.6)',
+                    duration: 0.5,
+                    yoyo: true,
+                    repeat: 1
+                });
+            }
+        });
+    });
+});
