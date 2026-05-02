@@ -64,19 +64,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 );
-    
-    // Location cards animation - Fixed the blank section issue
-    gsap.from('.location-card', {
-        scrollTrigger: {
-            trigger: '.location-grid',
-            start: 'top 85%'
+    // Location cards animation - Bulletproof fromTo method
+    gsap.fromTo('.location-card', 
+        { 
+            opacity: 0, 
+            scale: 0.9 
         },
-        scale: 0.9,
-        opacity: 0,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: 'back.out(1.5)'
-    });
+        {
+            opacity: 1,
+            scale: 1,
+            duration: 0.6,
+            stagger: 0.1,
+            ease: 'back.out(1.5)',
+            scrollTrigger: {
+                trigger: '.location-grid',
+                start: 'top 85%',
+                toggleActions: 'play none none none'
+            }
+        }
+    );
     
     // Testimonial cards animation
     gsap.from('.testimonial-card', {
