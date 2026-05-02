@@ -249,7 +249,79 @@ function createPropertyCard(property) {
     
     return card;
 }
+// Add touch/swipe support for mobile users
+function addTouchSupport(card) {
+    const imageContainer = card.querySelector('.property-image');
+    if (!imageContainer) return;
+    
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
+    
+    // Minimum horizontal swipe distance (in pixels)
+    const minSwipeDistance = 50;
+    
+    // Touch start event
+    imageContainer.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+    
+    // Touch end event
+    imageContainer.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+        
+        // Check if horizontal swipe (ignore vertical scrolling)
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+            e.preventDefault();
+            
+            if (deltaX > 0) {
+                // Swipe Right - Previous image
+                changeImage(card, -1);
+                // Add haptic feedback (vibration) if supported
+                if (window.navigator && window.navigator.vibrate) {
+                    window.navigator.vibrate(50);
+                }
+            } else {
+                // Swipe Left - Next image
+                changeImage(card, 1);
+                if (window.navigator && window.navigator.vibrate) {
+                    window.navigator.vibrate(50);
+                }
+            }
+            
+            // Add visual feedback animation
+            addSwipeFeedback(card, deltaX);
+        }
+    }, { passive: false });
+}
 
+// Add visual feedback for swipe
+function addSwipeFeedback(card, deltaX) {
+    const imgElement = card.querySelector('.property-img');
+    if (!imgElement) return;
+    
+    // Add swipe animation class
+    imgElement.style.transition = 'transform 0.2s ease';
+    if (deltaX > 0) {
+        imgElement.style.transform = 'translateX(20px)';
+    } else {
+        imgElement.style.transform = 'translateX(-20px)';
+    }
+    
+    // Reset after animation
+    setTimeout(() => {
+        imgElement.style.transform = 'translateX(0)';
+        setTimeout(() => {
+            imgElement.style.transition = '';
+        }, 200);
+    }, 150);
+}
 // Function to change image (next/prev)
 function changeImage(card, direction) {
     const images = JSON.parse(card.getAttribute('data-images'));
