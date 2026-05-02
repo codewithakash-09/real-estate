@@ -1,194 +1,416 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Bittu Khari Real Estate</title>
-    <link rel="stylesheet" href="css/admin.css">
-</head>
-<body>
-    <div class="admin-container">
-        <!-- Login Screen -->
-        <div id="loginScreen" class="login-screen">
-            <div class="login-box">
-                <h1>Admin Login</h1>
-                <form id="loginForm">
-                    <div class="form-group">
-                        <input type="text" id="username" placeholder="Username" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="password" id="password" placeholder="Password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Login</button>
-                </form>
-                <div id="loginError" class="error-message"></div>
-            </div>
-        </div>
+const API_BASE_URL = '/api';
+let authToken = localStorage.getItem('authToken');
 
-        <!-- Dashboard Screen -->
-        <div id="dashboardScreen" class="dashboard-screen" style="display: none;">
-            <!-- Sidebar -->
-            <nav class="sidebar">
-                <div class="sidebar-brand">
-                    <h2>BK Real Estate</h2>
-                    <p>Admin Panel</p>
-                </div>
-                <ul class="sidebar-menu">
-                    <li><a href="#" onclick="showSection('properties')" class="active">Properties</a></li>
-                    <li><a href="#" onclick="showSection('leads')">Leads</a></li>
-                    <li><a href="#" onclick="showSection('addProperty')">Add Property</a></li>
-                    <li><a href="#" onclick="logout()">Logout</a></li>
-                </ul>
-            </nav>
+// Check authentication on load
+document.addEventListener('DOMContentLoaded', () => {
+    if (authToken) {
+        showDashboard();
+        loadProperties();
+    }
+});
 
-            <!-- Main Content -->
-            <main class="main-content">
-                <!-- Properties Section -->
-                <div id="propertiesSection" class="content-section">
-                    <div class="section-header">
-                        <h2>Property Listings</h2>
-                        <button class="btn btn-primary" onclick="showSection('addProperty')">+ Add New Property</button>
-                    </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Title</th>
-                                    <th>Price</th>
-                                    <th>Location</th>
-                                    <th>Type</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="propertiesTableBody">
-                                <!-- Properties loaded dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+// Login
+document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('loginError');
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            authToken = data.token;
+            localStorage.setItem('authToken', authToken);
+            showDashboard();
+            loadProperties();
+        } else {
+            errorDiv.textContent = data.message || 'Login failed';
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        errorDiv.textContent = 'Connection error. Please try again.';
+        errorDiv.style.display = 'block';
+    }
+});
 
-                <!-- Leads Section -->
-                <div id="leadsSection" class="content-section" style="display: none;">
-                    <div class="section-header">
-                        <h2>Lead Management</h2>
-                        <div class="lead-stats">
-                            <span>Total: <strong id="totalLeads">0</strong></span>
-                            <span>Pending: <strong id="pendingLeads">0</strong></span>
-                            <span>Contacted: <strong id="contactedLeads">0</strong></span>
-                        </div>
-                    </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Name</th>
-                                    <th>Phone</th>
-                                    <th>Message</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="leadsTableBody">
-                                <!-- Leads loaded dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+// Show dashboard
+function showDashboard() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboardScreen').style.display = 'flex';
+}
 
-                <!-- Add/Edit Property Section -->
-                <div id="addPropertySection" class="content-section" style="display: none;">
-                    <div class="section-header">
-                        <h2 id="formTitle">Add New Property</h2>
-                    </div>
-                    <form id="propertyForm" class="property-form">
-                        <input type="hidden" id="propertyId">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Title</label>
-                                <input type="text" id="title" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Price (₹)</label>
-                                <input type="number" id="price" required>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Location</label>
-                                <select id="location" required>
-                                    <option value="">Select Location</option>
-                                    <option value="Ghaziabad">Ghaziabad</option>
-                                    <option value="Dadri">Dadri</option>
-                                    <option value="Loni">Loni</option>
-                                    <option value="Hapur">Hapur</option>
-                                    <option value="Delhi">Delhi</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Type</label>
-                                <select id="type" required>
-                                    <option value="">Select Type</option>
-                                    <option value="GDA Flat">GDA Flat</option>
-                                    <option value="Builder Flat">Builder Flat</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Bedrooms</label>
-                                <input type="number" id="bedrooms" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Bathrooms</label>
-                                <input type="number" id="bathrooms" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Area (sq.ft)</label>
-                                <input type="number" id="area" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Description</label>
-                            <textarea id="description" rows="4" required></textarea>
-                        </div>
-                        <!-- Add this inside the property form, after the description field -->
-<div class="form-group">
-    <label>Main Image URL (Cover Photo)</label>
-    <input type="text" id="mainImage" placeholder="https://example.com/main-image.jpg">
-</div>
+// Show section
+function showSection(section) {
+    console.log('Showing section:', section);
+    
+    // Hide all sections
+    document.querySelectorAll('.content-section').forEach(s => {
+        s.style.display = 'none';
+    });
+    
+    // Remove active class from all menu items
+    document.querySelectorAll('.sidebar-menu a').forEach(a => {
+        a.classList.remove('active');
+    });
+    
+    // Show selected section
+    switch(section) {
+        case 'properties':
+            document.getElementById('propertiesSection').style.display = 'block';
+            loadProperties();
+            break;
+        case 'leads':
+            document.getElementById('leadsSection').style.display = 'block';
+            loadLeads();
+            break;
+        case 'addProperty':
+            // Only reset if we're not editing (propertyId is empty)
+            const propertyId = document.getElementById('propertyId').value;
+            if (!propertyId) {
+                document.getElementById('formTitle').textContent = 'Add New Property';
+                document.getElementById('propertyForm').reset();
+                document.getElementById('submitBtn').textContent = 'Save Property';
+                document.getElementById('propertyId').value = '';
+                const previewContainer = document.getElementById('imagePreviewContainer');
+                if (previewContainer) previewContainer.innerHTML = '';
+            }
+            document.getElementById('addPropertySection').style.display = 'block';
+            break;
+    }
+    
+    // Add active class to clicked menu item
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
+}
 
-<div class="form-group">
-    <label>Additional Images (Enter URLs separated by commas)</label>
-    <textarea id="images" rows="3" placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg, https://example.com/image3.jpg"></textarea>
-    <small>Enter image URLs separated by commas. Max 10 images recommended.</small>
-</div>
+// Logout
+function logout() {
+    localStorage.removeItem('authToken');
+    authToken = null;
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('dashboardScreen').style.display = 'none';
+}
 
-<div class="form-group">
-    <label>Upload Images from Computer</label>
-    <input type="file" id="imageFiles" multiple accept="image/*">
-    <small>You can select multiple images at once (JPG, PNG, WEBP)</small>
-</div>
-                        <div class="form-group">
-                            <label>Status</label>
-                            <select id="status">
-                                <option value="Available">Available</option>
-                                <option value="Sold">Sold</option>
-                                <option value="Under Process">Under Process</option>
-                            </select>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary" id="submitBtn">Save Property</button>
-                            <button type="button" class="btn btn-secondary" onclick="showSection('properties')">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            </main>
-        </div>
-    </div>
+// Load properties
+async function loadProperties() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/properties`);
+        const properties = await response.json();
+        
+        const tbody = document.getElementById('propertiesTableBody');
+        tbody.innerHTML = '';
+        
+        properties.forEach(property => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${property._id.substring(0, 8)}...</td>
+                <td>${property.title}</td>
+                <td>₹${property.price.toLocaleString('en-IN')}</td>
+                <td>${property.location}</td>
+                <td>${property.type}</td>
+                <td><span class="status-badge status-${property.status.toLowerCase().replace(' ', '-')}">${property.status}</span></td>
+                <td>
+<button class="btn btn-sm btn-edit" onclick="editProperty('${property._id}')">Edit</button>
+                    <button class="btn btn-sm btn-delete" onclick="deleteProperty('${property._id}')">Delete</button>
+                 </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (error) {
+        console.error('Error loading properties:', error);
+    }
+}
 
-    <script src="js/admin.js"></script>
-</body>
-</html>
+// Load leads
+async function loadLeads() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/leads`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        const leads = await response.json();
+        
+        const tbody = document.getElementById('leadsTableBody');
+        tbody.innerHTML = '';
+        
+        leads.forEach(lead => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${new Date(lead.createdAt).toLocaleDateString()}</td>
+                <td>${lead.name}</td>
+                <td>${lead.phone}</td>
+                <td>${lead.message.substring(0, 50)}...</td>
+                <td><span class="status-badge status-${lead.status}">${lead.status}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-status" onclick="updateLeadStatus('${lead._id}', 'contacted')">Mark Contacted</button>
+                 </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        // Update stats
+        document.getElementById('totalLeads').textContent = leads.length;
+        document.getElementById('pendingLeads').textContent = leads.filter(l => l.status === 'pending').length;
+        document.getElementById('contactedLeads').textContent = leads.filter(l => l.status === 'contacted').length;
+    } catch (error) {
+        console.error('Error loading leads:', error);
+    }
+}
+
+// Update lead status
+async function updateLeadStatus(id, status) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/leads/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ status })
+        });
+        
+        if (response.ok) {
+            loadLeads();
+        } else {
+            alert('Failed to update lead status');
+        }
+    } catch (error) {
+        console.error('Error updating lead:', error);
+    }
+}
+
+// Delete property
+async function deleteProperty(id) {
+    if (!confirm('Are you sure you want to delete this property?')) return;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/properties/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (response.ok) {
+            alert('Property deleted successfully');
+            loadProperties();
+        } else {
+            alert('Failed to delete property');
+        }
+    } catch (error) {
+        console.error('Error deleting property:', error);
+        alert('Error deleting property');
+    }
+}
+
+// ============= IMAGE UPLOAD FUNCTIONS =============
+
+async function uploadImages(files) {
+    const uploadedUrls = [];
+    
+    for (let file of files) {
+        if (file.size > 5 * 1024 * 1024) {
+            alert(`${file.name} is too large. Max 5MB.`);
+            continue;
+        }
+        
+        if (!file.type.startsWith('image/')) {
+            alert(`${file.name} is not an image.`);
+            continue;
+        }
+        
+        const imageUrl = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(file);
+        });
+        
+        uploadedUrls.push(imageUrl);
+    }
+    
+    return uploadedUrls;
+}
+
+function createPreviewContainer() {
+    let container = document.getElementById('imagePreviewContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'imagePreviewContainer';
+        container.className = 'image-preview-grid';
+        const formGroup = document.querySelector('#imageFiles').parentElement;
+        formGroup.appendChild(container);
+    }
+    return container;
+}
+
+document.getElementById('imageFiles')?.addEventListener('change', function(e) {
+    const files = Array.from(e.target.files);
+    const previewContainer = createPreviewContainer();
+    
+    previewContainer.innerHTML = '';
+    
+    files.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const previewDiv = document.createElement('div');
+            previewDiv.className = 'image-preview-item';
+            previewDiv.innerHTML = `
+                <img src="${e.target.result}" alt="Preview ${index}">
+                <button class="remove-image-btn" data-index="${index}">×</button>
+            `;
+            previewContainer.appendChild(previewDiv);
+        };
+        reader.readAsDataURL(file);
+    });
+});
+
+// ============= PROPERTY FORM SUBMISSION =============
+document.getElementById('propertyForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const propertyId = document.getElementById('propertyId').value;
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.textContent;
+    
+    const imageFiles = document.getElementById('imageFiles')?.files;
+    let uploadedImages = [];
+    
+    if (imageFiles && imageFiles.length > 0) {
+        submitBtn.textContent = 'Uploading Images...';
+        submitBtn.disabled = true;
+        uploadedImages = await uploadImages(Array.from(imageFiles));
+    }
+    
+    const imagesText = document.getElementById('images').value;
+    const existingImages = imagesText ? imagesText.split(',').map(url => url.trim()).filter(url => url) : [];
+    const allImages = [...existingImages, ...uploadedImages];
+    const mainImage = document.getElementById('mainImage').value || (allImages[0] || '');
+    
+    const formData = {
+        title: document.getElementById('title').value,
+        price: parseInt(document.getElementById('price').value),
+        location: document.getElementById('location').value,
+        type: document.getElementById('type').value,
+        bedrooms: parseInt(document.getElementById('bedrooms').value),
+        bathrooms: parseInt(document.getElementById('bathrooms').value),
+        area: parseInt(document.getElementById('area').value),
+        description: document.getElementById('description').value,
+        status: document.getElementById('status').value,
+        mainImage: mainImage,
+        images: allImages
+    };
+    
+    if (!formData.title || !formData.price || !formData.location || !formData.type) {
+        alert('Please fill in all required fields');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return;
+    }
+    
+    try {
+        const url = propertyId 
+            ? `${API_BASE_URL}/properties/${propertyId}`
+            : `${API_BASE_URL}/properties`;
+        
+        const method = propertyId ? 'PUT' : 'POST';
+        
+        submitBtn.textContent = 'Saving...';
+        submitBtn.disabled = true;
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+            alert(propertyId ? 'Property updated successfully!' : 'Property added successfully!');
+            showSection('properties');
+            loadProperties();
+            document.getElementById('propertyForm').reset();
+            document.getElementById('propertyId').value = '';
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            if (previewContainer) previewContainer.innerHTML = '';
+        } else {
+            const error = await response.json();
+            alert(error.message || 'Failed to save property');
+        }
+    } catch (error) {
+        console.error('Error saving property:', error);
+        alert('Error saving property. Please check your connection.');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+});
+
+/// ============= EDIT PROPERTY =============
+async function editProperty(id) {
+    console.log('Edit button clicked for property ID:', id);
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/properties/${id}`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch property');
+        }
+        
+        const property = await response.json();
+        console.log('Property loaded:', property);
+        
+        // Fill all form fields
+        document.getElementById('propertyId').value = property._id;
+        document.getElementById('title').value = property.title || '';
+        document.getElementById('price').value = property.price || '';
+        document.getElementById('location').value = property.location || '';
+        document.getElementById('type').value = property.type || '';
+        document.getElementById('bedrooms').value = property.bedrooms || '';
+        document.getElementById('bathrooms').value = property.bathrooms || '';
+        document.getElementById('area').value = property.area || '';
+        document.getElementById('description').value = property.description || '';
+        document.getElementById('status').value = property.status || 'Available';
+        document.getElementById('mainImage').value = property.mainImage || '';
+        document.getElementById('images').value = property.images ? property.images.join(', ') : '';
+        
+        // Clear file input and preview
+        document.getElementById('imageFiles').value = '';
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        if (previewContainer) previewContainer.innerHTML = '';
+        
+        // Change form title and button text
+        document.getElementById('formTitle').textContent = 'Edit Property';
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) submitBtn.textContent = 'Update Property';
+        
+        // Hide all sections first
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.style.display = 'none';
+        });
+        
+        // Show the add property section
+        const addPropertySection = document.getElementById('addPropertySection');
+        if (addPropertySection) {
+            addPropertySection.style.display = 'block';
+            console.log('Add property section displayed');
+        } else {
+            console.error('addPropertySection element not found');
+        }
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+    } catch (error) {
+        console.error('Error loading property for edit:', error);
+        alert('Failed to load property details. Please try again.');
+    }
+}
