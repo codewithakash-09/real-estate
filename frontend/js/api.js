@@ -1,6 +1,10 @@
 // API Configuration
 const API_BASE_URL = window.location.origin + '/api';
 let authToken = localStorage.getItem('authToken');
+// API Configuration
+const API_BASE_URL = window.location.origin + '/api';
+let authToken = localStorage.getItem('authToken');
+
 // Fetch all properties with filters
 async function fetchProperties(filters = {}) {
     try {
@@ -13,7 +17,9 @@ async function fetchProperties(filters = {}) {
         
         const response = await fetch(`${API_BASE_URL}/properties?${queryParams}`);
         if (!response.ok) throw new Error('Failed to fetch properties');
-        return await response.json();
+        const data = await response.json();
+        console.log('Fetched properties from API:', data.length);
+        return data;
     } catch (error) {
         console.error('Error fetching properties:', error);
         return [];
