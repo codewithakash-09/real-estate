@@ -10,81 +10,15 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 
+// Import Database connection and Models
+const connectDB = require('./config/db');
+const Property = require('./models/Property');
+const Lead = require('./models/Lead');
+
 const app = express();
-let dbConnection = false;
 
-// ============= JSON FILE STORAGE (FALLBACK) =============
-const dataPath = path.join(__dirname, 'data.json');
-
-// Load data from file
-function loadData() {
-    try {
-        if (fs.existsSync(dataPath)) {
-            const data = fs.readFileSync(dataPath, 'utf8');
-            const parsed = JSON.parse(data);
-            return { 
-                properties: parsed.properties || [], 
-                leads: parsed.leads || [] 
-            };
-        }
-    } catch (error) {
-        console.error('Error loading data:', error);
-    }
-    return { properties: [], leads: [] };
-}
-
-// Save data to file
-function saveData(properties, leads) {
-    try {
-        const data = { properties, leads, lastUpdated: new Date().toISOString() };
-        fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
-        console.log('💾 Data saved to JSON file');
-    } catch (error) {
-        console.error('Error saving data:', error);
-    }
-}
-
-// Load initial data
-let savedData = loadData();
-let properties = savedData.properties;
-let leads = savedData.leads;
-
-// If no properties exist, add default sample data
-if (properties.length === 0) {
-    properties = [
-        {
-            _id: "1",
-            title: '2BHK GDA Flat in Vaishali',
-            price: 3500000,
-            location: 'Ghaziabad',
-            type: 'GDA Flat',
-            bedrooms: 2,
-            bathrooms: 2,
-            area: 850,
-            description: 'Beautiful GDA flat in prime location of Vaishali, near metro station',
-            status: 'Available',
-            images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'],
-            mainImage: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
-            createdAt: new Date().toISOString()
-        },
-        {
-            _id: "2",
-            title: '3BHK Builder Apartment Indirapuram',
-            price: 7500000,
-            location: 'Ghaziabad',
-            type: 'Builder Flat',
-            bedrooms: 3,
-            bathrooms: 3,
-            area: 1450,
-            description: 'Luxurious builder apartment in Indirapuram with modern amenities',
-            status: 'Available',
-            images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'],
-            mainImage: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
-            createdAt: new Date().toISOString()
-        }
-    ];
-    saveData(properties, leads);
-}
+// ============= MONGODB CONNECTION =============
+connectDB();
 
 // Security Middleware
 app.use(helmet({
@@ -124,66 +58,6 @@ console.log('Serving frontend from:', frontendPath);
 app.use(express.static(frontendPath));
 app.use('/admin', express.static(path.join(frontendPath, 'admin')));
 
-// ============= MONGODB CONNECTION =============
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-    console.error('❌ MONGODB_URI is not defined in environment variables!');
-    console.log('⚠️  Using JSON file storage mode');
-} else {
-    if (!MONGODB_URI.startsWith('mongodb://') && !MONGODB_URI.startsWith('mongodb+srv://')) {
-        console.error('❌ Invalid MONGODB_URI format');
-        console.log('⚠️  Using JSON file storage mode');
-    } else {
-        mongoose.connect(MONGODB_URI, {
-            serverSelectionTimeoutMS: 5000,
-            socketTimeoutMS: 45000,
-        })
-        .then(() => {
-            console.log('✅ MongoDB Connected Successfully!');
-            console.log('📊 Database:', mongoose.connection.name);
-            dbConnection = true;
-        })
-        .catch(err => {
-            console.error('❌ MongoDB Connection Error:', err.message);
-            console.log('⚠️  Falling back to JSON file storage');
-            dbConnection = false;
-        });
-    }
-}
-
-// ============= SCHEMAS =============
-const propertySchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    price: { type: Number, required: true },
-    location: { type: String, required: true, enum: ['Ghaziabad', 'Dadri', 'Loni', 'Hapur', 'Delhi'] },
-    type: { type: String, required: true, enum: ['GDA Flat', 'Builder Flat','Plot','House'] },
-    description: { type: String, required: true },
-    bedrooms: { type: Number, required: true },
-    bathrooms: { type: Number, required: true },
-    area: { type: Number, required: true },
-    images: { type: [String], default: [] },
-    mainImage: { type: String, default: '' },
-    status: { type: String, enum: ['Available', 'Sold', 'Under Process'], default: 'Available' },
-    createdAt: { type: Date, default: Date.now }
-});
-
-const leadSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    phone: { type: String, required: true },
-    message: { type: String, required: true },
-    status: { type: String, enum: ['pending', 'contacted', 'converted', 'rejected'], default: 'pending' },
-    notes: { type: String, default: '' },
-    source: { type: String, default: 'website' },
-    createdAt: { type: Date, default: Date.now }
-});
-
-let Property, Lead;
-if (mongoose.connection.readyState === 1) {
-    Property = mongoose.model('Property', propertySchema);
-    Lead = mongoose.model('Lead', leadSchema);
-}
-
 // ============= AUTH MIDDLEWARE =============
 const authMiddleware = (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -201,39 +75,23 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-// Helper function to save JSON data
-function persistData() {
-    if (!dbConnection) {
-        saveData(properties, leads);
-    }
-}
-
 // ============= PROPERTY ROUTES =============
 
 // GET all properties
 app.get('/api/properties', async (req, res) => {
     try {
         const { location, type, minPrice, maxPrice } = req.query;
+        let filter = {};
         
-        if (Property && mongoose.connection.readyState === 1) {
-            let filter = {};
-            if (location && location !== '') filter.location = location;
-            if (type && type !== '') filter.type = type;
-            if (minPrice && minPrice !== '' || maxPrice && maxPrice !== '') {
-                filter.price = {};
-                if (minPrice && minPrice !== '') filter.price.$gte = parseInt(minPrice);
-                if (maxPrice && maxPrice !== '') filter.price.$lte = parseInt(maxPrice);
-            }
-            const data = await Property.find(filter).sort({ createdAt: -1 });
-            return res.json(data);
+        if (location && location !== '') filter.location = location;
+        if (type && type !== '') filter.type = type;
+        if (minPrice && minPrice !== '' || maxPrice && maxPrice !== '') {
+            filter.price = {};
+            if (minPrice && minPrice !== '') filter.price.$gte = parseInt(minPrice);
+            if (maxPrice && maxPrice !== '') filter.price.$lte = parseInt(maxPrice);
         }
-        
-        let filtered = [...properties];
-        if (location && location !== '') filtered = filtered.filter(p => p.location === location);
-        if (type && type !== '') filtered = filtered.filter(p => p.type === type);
-        if (minPrice && minPrice !== '') filtered = filtered.filter(p => p.price >= parseInt(minPrice));
-        if (maxPrice && maxPrice !== '') filtered = filtered.filter(p => p.price <= parseInt(maxPrice));
-        res.json(filtered);
+        const data = await Property.find(filter).sort({ createdAt: -1 });
+        return res.json(data);
     } catch (error) {
         console.error('Error fetching properties:', error);
         res.status(500).json({ message: error.message });
@@ -243,15 +101,9 @@ app.get('/api/properties', async (req, res) => {
 // GET single property
 app.get('/api/properties/:id', async (req, res) => {
     try {
-        if (Property && mongoose.connection.readyState === 1) {
-            const property = await Property.findById(req.params.id);
-            if (!property) return res.status(404).json({ message: 'Property not found' });
-            return res.json(property);
-        }
-        
-        const property = properties.find(p => p._id === req.params.id);
+        const property = await Property.findById(req.params.id);
         if (!property) return res.status(404).json({ message: 'Property not found' });
-        res.json(property);
+        return res.json(property);
     } catch (error) {
         console.error('Error fetching property:', error);
         res.status(500).json({ message: error.message });
@@ -267,22 +119,10 @@ app.post('/api/properties', authMiddleware, async (req, res) => {
             imagesCount: req.body.images?.length || 0
         });
         
-        if (Property && mongoose.connection.readyState === 1) {
-            const property = new Property(req.body);
-            await property.save();
-            console.log('✅ Property saved to MongoDB');
-            return res.status(201).json(property);
-        }
-        
-        const newProperty = {
-            _id: Date.now().toString(),
-            ...req.body,
-            createdAt: new Date().toISOString()
-        };
-        properties.push(newProperty);
-        persistData(); // Save to JSON file
-        console.log('💾 Property saved to JSON file');
-        res.status(201).json(newProperty);
+        const property = new Property(req.body);
+        await property.save();
+        console.log('✅ Property saved to MongoDB');
+        return res.status(201).json(property);
     } catch (error) {
         console.error('❌ Error creating property:', error);
         res.status(400).json({ message: error.message });
@@ -293,20 +133,10 @@ app.post('/api/properties', authMiddleware, async (req, res) => {
 app.put('/api/properties/:id', authMiddleware, async (req, res) => {
     try {
         console.log('📝 Updating property:', req.params.id);
-        
-        if (Property && mongoose.connection.readyState === 1) {
-            const property = await Property.findByIdAndUpdate(req.params.id, req.body, { new: true });
-            if (!property) return res.status(404).json({ message: 'Property not found' });
-            console.log('✅ Property updated in MongoDB');
-            return res.json(property);
-        }
-        
-        const index = properties.findIndex(p => p._id === req.params.id);
-        if (index === -1) return res.status(404).json({ message: 'Property not found' });
-        properties[index] = { ...properties[index], ...req.body };
-        persistData(); // Save to JSON file
-        console.log('💾 Property updated in JSON file');
-        res.json(properties[index]);
+        const property = await Property.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!property) return res.status(404).json({ message: 'Property not found' });
+        console.log('✅ Property updated in MongoDB');
+        return res.json(property);
     } catch (error) {
         console.error('❌ Error updating property:', error);
         res.status(400).json({ message: error.message });
@@ -316,17 +146,9 @@ app.put('/api/properties/:id', authMiddleware, async (req, res) => {
 // DELETE property
 app.delete('/api/properties/:id', authMiddleware, async (req, res) => {
     try {
-        if (Property && mongoose.connection.readyState === 1) {
-            const property = await Property.findByIdAndDelete(req.params.id);
-            if (!property) return res.status(404).json({ message: 'Property not found' });
-            return res.json({ message: 'Property deleted successfully' });
-        }
-        
-        const index = properties.findIndex(p => p._id === req.params.id);
-        if (index === -1) return res.status(404).json({ message: 'Property not found' });
-        properties.splice(index, 1);
-        persistData(); // Save to JSON file
-        res.json({ message: 'Property deleted successfully' });
+        const property = await Property.findByIdAndDelete(req.params.id);
+        if (!property) return res.status(404).json({ message: 'Property not found' });
+        return res.json({ message: 'Property deleted successfully' });
     } catch (error) {
         console.error('Error deleting property:', error);
         res.status(500).json({ message: error.message });
@@ -342,27 +164,10 @@ app.post('/api/leads', async (req, res) => {
             return res.status(400).json({ message: 'Name and phone are required' });
         }
         
-        if (Lead && mongoose.connection.readyState === 1) {
-            const lead = new Lead({ name, phone, message });
-            await lead.save();
-            console.log('📞 Lead saved to MongoDB:', { name, phone });
-            return res.status(201).json({ message: 'Lead submitted successfully' });
-        }
-        
-        const lead = {
-            _id: Date.now().toString(),
-            name,
-            phone,
-            message: message || '',
-            status: 'pending',
-            notes: '',
-            source: 'website',
-            createdAt: new Date().toISOString()
-        };
-        leads.push(lead);
-        persistData(); // Save to JSON file
-        console.log('📞 Lead saved to JSON file:', { name, phone });
-        res.status(201).json({ message: 'Lead submitted successfully' });
+        const lead = new Lead({ name, phone, message });
+        await lead.save();
+        console.log('📞 Lead saved to MongoDB:', { name, phone });
+        return res.status(201).json({ message: 'Lead submitted successfully' });
     } catch (error) {
         console.error('Error saving lead:', error);
         res.status(400).json({ message: error.message });
@@ -371,13 +176,8 @@ app.post('/api/leads', async (req, res) => {
 
 app.get('/api/leads', authMiddleware, async (req, res) => {
     try {
-        if (Lead && mongoose.connection.readyState === 1) {
-            const allLeads = await Lead.find().sort({ createdAt: -1 });
-            return res.json(allLeads);
-        }
-        
-        const sortedLeads = [...leads].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        res.json(sortedLeads);
+        const allLeads = await Lead.find().sort({ createdAt: -1 });
+        return res.json(allLeads);
     } catch (error) {
         console.error('Error fetching leads:', error);
         res.status(500).json({ message: error.message });
@@ -387,19 +187,9 @@ app.get('/api/leads', authMiddleware, async (req, res) => {
 app.put('/api/leads/:id', authMiddleware, async (req, res) => {
     try {
         const { status, notes } = req.body;
-        
-        if (Lead && mongoose.connection.readyState === 1) {
-            const lead = await Lead.findByIdAndUpdate(req.params.id, { status, notes }, { new: true });
-            if (!lead) return res.status(404).json({ message: 'Lead not found' });
-            return res.json(lead);
-        }
-        
-        const index = leads.findIndex(l => l._id === req.params.id);
-        if (index === -1) return res.status(404).json({ message: 'Lead not found' });
-        if (status) leads[index].status = status;
-        if (notes) leads[index].notes = notes;
-        persistData(); // Save to JSON file
-        res.json(leads[index]);
+        const lead = await Lead.findByIdAndUpdate(req.params.id, { status, notes }, { new: true });
+        if (!lead) return res.status(404).json({ message: 'Lead not found' });
+        return res.json(lead);
     } catch (error) {
         console.error('Error updating lead:', error);
         res.status(400).json({ message: error.message });
@@ -464,16 +254,29 @@ app.get('/api/health', async (req, res) => {
         }
     }
     
-    res.json({
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        mongodb: dbStatus,
-        databaseResponding: dbResponding,
-        storage: dbResponding ? 'MongoDB' : (fs.existsSync(dataPath) ? 'JSON File' : 'In-Memory'),
-        propertiesCount: properties.length,
-        leadsCount: leads.length,
-        environment: process.env.NODE_ENV || 'development'
-    });
+    try {
+        const propertiesCount = await Property.countDocuments();
+        const leadsCount = await Lead.countDocuments();
+        
+        res.json({
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            mongodb: dbStatus,
+            databaseResponding: dbResponding,
+            storage: 'MongoDB',
+            propertiesCount,
+            leadsCount,
+            environment: process.env.NODE_ENV || 'development'
+        });
+    } catch (error) {
+        res.json({
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            mongodb: dbStatus,
+            databaseResponding: dbResponding,
+            error: 'Could not fetch counts'
+        });
+    }
 });
 
 // ============= ROBOTS.TXT & SITEMAP =============
@@ -493,10 +296,10 @@ app.get('/sitemap.xml', async (req, res) => {
     const currentDate = new Date().toISOString().split('T')[0];
     
     let propertiesList = [];
-    if (Property && mongoose.connection.readyState === 1) {
+    try {
         propertiesList = await Property.find().select('_id updatedAt');
-    } else {
-        propertiesList = properties;
+    } catch (error) {
+        console.error('Sitemap DB Error:', error);
     }
     
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -517,7 +320,7 @@ app.get('/sitemap.xml', async (req, res) => {
         sitemap += `
   <url>
     <loc>${baseUrl}/property/${property._id}</loc>
-    <lastmod>property.updatedAt ? property.updatedAt.toISOString().split('T')[0] : currentDate}</lastmod>
+    <lastmod>${property.updatedAt ? property.updatedAt.toISOString().split('T')[0] : currentDate}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>`;
@@ -530,13 +333,19 @@ app.get('/sitemap.xml', async (req, res) => {
     res.send(sitemap);
 });
 
-// Export data endpoint (for backup)
-app.get('/api/export-data', (req, res) => {
-    res.json({
-        properties: properties,
-        leads: leads,
-        exportedAt: new Date().toISOString()
-    });
+// Export data endpoint (Adapted to pull directly from MongoDB)
+app.get('/api/export-data', async (req, res) => {
+    try {
+        const properties = await Property.find();
+        const leads = await Lead.find();
+        res.json({
+            properties,
+            leads,
+            exportedAt: new Date().toISOString()
+        });
+    } catch(error) {
+         res.status(500).json({ message: 'Error exporting data' });
+    }
 });
 
 // Catch-all route for frontend (must be last)
@@ -570,10 +379,6 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     
     if (mongoose.connection.readyState === 1) {
         console.log('💾 Using MongoDB Database ✅');
-    } else if (fs.existsSync(dataPath)) {
-        console.log('💾 Using JSON File Storage ✅ (Data persists across restarts!)');
-    } else {
-        console.log('💾 Using In-Memory Database ⚠️');
     }
     
     if (ADMIN_USERNAME && ADMIN_PASSWORD) {
