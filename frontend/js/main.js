@@ -1,6 +1,6 @@
 // Main JavaScript
 document.addEventListener('DOMContentLoaded', () => {
-    // Load properties
+    // Load properties from API
     loadProperties();
     
     // Mobile menu toggle
@@ -87,7 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-// Load and display properties
+
+// Load and display properties from API
 async function loadProperties() {
     const propertyGrid = document.getElementById('propertyGrid');
     const loadingSpinner = document.getElementById('loadingSpinner');
@@ -100,11 +101,12 @@ async function loadProperties() {
         // ALWAYS fetch from API first
         const properties = await fetchProperties();
         
+        console.log('Properties loaded from API:', properties.length);
+        
         if (properties && properties.length > 0) {
             displayProperties(properties, propertyGrid);
         } else {
-            // Only show samples if API returns empty AND we're not connected
-            console.log('No properties from API, showing message');
+            // Show message when no properties
             propertyGrid.innerHTML = `
                 <div style="text-align: center; padding: 3rem; grid-column: 1/-1;">
                     <p>No properties available yet. Check back soon!</p>
@@ -125,7 +127,6 @@ async function loadProperties() {
     }
 }
 
-
 function displayProperties(properties, container) {
     container.innerHTML = '';
     properties.forEach(property => {
@@ -139,15 +140,13 @@ function createPropertyCard(property) {
     const card = document.createElement('div');
     card.className = 'property-card';
     
-    // Get all images - ENSURE MULTIPLE IMAGES FOR BUTTONS TO SHOW
+    // Get all images
     let allImages = [];
     
     if (property.images && Array.isArray(property.images) && property.images.length > 0) {
         allImages = property.images;
     } else if (property.mainImage && property.mainImage.trim() !== '') {
         allImages = [property.mainImage];
-    } else if (property.image && property.image.trim() !== '') {
-        allImages = [property.image];
     } else {
         allImages = ['https://via.placeholder.com/800x600?text=Property+Image'];
     }
@@ -204,7 +203,7 @@ function createPropertyCard(property) {
                 ${dotsHtml}
             ` : ''}
             
-            <span class="property-type">${property.type}</span>
+            <span class="property-type">${property.type || 'Property'}</span>
         </div>
         ${thumbnailsHtml}
         <div class="property-details">
@@ -212,9 +211,9 @@ function createPropertyCard(property) {
             <div class="property-price">₹${formatPrice(property.price)}</div>
             <div class="property-location">📍 ${escapeHtml(property.location)}</div>
             <div class="property-features">
-                <span class="feature">🛏️ ${property.bedrooms} Beds</span>
-                <span class="feature">🚿 ${property.bathrooms} Baths</span>
-                <span class="feature">📐 ${property.area} sq.ft</span>
+                <span class="feature">🛏️ ${property.bedrooms || 0} Beds</span>
+                <span class="feature">🚿 ${property.bathrooms || 0} Baths</span>
+                <span class="feature">📐 ${property.area || 0} sq.ft</span>
             </div>
             <p>${escapeHtml(property.description?.substring(0, 100))}${property.description?.length > 100 ? '...' : ''}</p>
             <div class="property-actions">
@@ -263,79 +262,7 @@ function createPropertyCard(property) {
     
     return card;
 }
-// Add touch/swipe support for mobile users
-function addTouchSupport(card) {
-    const imageContainer = card.querySelector('.property-image');
-    if (!imageContainer) return;
-    
-    let touchStartX = 0;
-    let touchEndX = 0;
-    let touchStartY = 0;
-    let touchEndY = 0;
-    
-    // Minimum horizontal swipe distance (in pixels)
-    const minSwipeDistance = 50;
-    
-    // Touch start event
-    imageContainer.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
-    }, { passive: true });
-    
-    // Touch end event
-    imageContainer.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        touchEndY = e.changedTouches[0].screenY;
-        
-        const deltaX = touchEndX - touchStartX;
-        const deltaY = touchEndY - touchStartY;
-        
-        // Check if horizontal swipe (ignore vertical scrolling)
-        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
-            e.preventDefault();
-            
-            if (deltaX > 0) {
-                // Swipe Right - Previous image
-                changeImage(card, -1);
-                // Add haptic feedback (vibration) if supported
-                if (window.navigator && window.navigator.vibrate) {
-                    window.navigator.vibrate(50);
-                }
-            } else {
-                // Swipe Left - Next image
-                changeImage(card, 1);
-                if (window.navigator && window.navigator.vibrate) {
-                    window.navigator.vibrate(50);
-                }
-            }
-            
-            // Add visual feedback animation
-            addSwipeFeedback(card, deltaX);
-        }
-    }, { passive: false });
-}
 
-// Add visual feedback for swipe
-function addSwipeFeedback(card, deltaX) {
-    const imgElement = card.querySelector('.property-img');
-    if (!imgElement) return;
-    
-    // Add swipe animation class
-    imgElement.style.transition = 'transform 0.2s ease';
-    if (deltaX > 0) {
-        imgElement.style.transform = 'translateX(20px)';
-    } else {
-        imgElement.style.transform = 'translateX(-20px)';
-    }
-    
-    // Reset after animation
-    setTimeout(() => {
-        imgElement.style.transform = 'translateX(0)';
-        setTimeout(() => {
-            imgElement.style.transition = '';
-        }, 200);
-    }, 150);
-}
 // Function to change image (next/prev)
 function changeImage(card, direction) {
     const images = JSON.parse(card.getAttribute('data-images'));
@@ -443,105 +370,4 @@ async function applyFilters(filters) {
     } finally {
         if (loadingSpinner) loadingSpinner.style.display = 'none';
     }
-}
-
-function displaySampleProperties(container) {
-    const sampleProperties = [
-        {
-            _id: "sample1",
-            title: '2BHK GDA Flat in Vaishali',
-            price: 3500000,
-            location: 'Ghaziabad',
-            type: 'GDA Flat',
-            bedrooms: 2,
-            bathrooms: 2,
-            area: 850,
-            description: 'Beautiful GDA flat in prime location of Vaishali, near metro station',
-            images: [
-                'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
-                'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500',
-                'https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=500'
-            ]
-        },
-        {
-            _id: "sample2",
-            title: '3BHK Builder Apartment Indirapuram',
-            price: 7500000,
-            location: 'Ghaziabad',
-            type: 'Builder Flat',
-            bedrooms: 3,
-            bathrooms: 3,
-            area: 1450,
-            description: 'Luxurious builder apartment in Indirapuram with modern amenities',
-            images: [
-                'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
-                'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500'
-            ]
-        },
-        {
-            _id: "sample3",
-            title: '1BHK GDA Flat Raj Nagar',
-            price: 1800000,
-            location: 'Ghaziabad',
-            type: 'GDA Flat',
-            bedrooms: 1,
-            bathrooms: 1,
-            area: 500,
-            description: 'Affordable GDA flat in Raj Nagar Extension',
-            images: [
-                'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'
-            ]
-        },
-        {
-            _id: "sample4",
-            title: '2BHK Builder Floor in Dadri',
-            price: 2500000,
-            location: 'Dadri',
-            type: 'Builder Flat',
-            bedrooms: 2,
-            bathrooms: 2,
-            area: 900,
-            description: 'Well-maintained builder floor near Greater Noida',
-            images: [
-                'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
-                'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500',
-                'https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=500'
-            ]
-        },
-        {
-            _id: "sample5",
-            title: '3BHK Independent House Loni',
-            price: 4500000,
-            location: 'Loni',
-            type: 'Builder Flat',
-            bedrooms: 3,
-            bathrooms: 3,
-            area: 1800,
-            description: 'Spacious independent house with parking',
-            images: [
-                'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
-                'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500'
-            ]
-        },
-        {
-            _id: "sample6",
-            title: '2BHK GDA Flat Hapur',
-            price: 1500000,
-            location: 'Hapur',
-            type: 'GDA Flat',
-            bedrooms: 2,
-            bathrooms: 2,
-            area: 750,
-            description: 'Budget-friendly GDA flat on NH-24',
-            images: [
-                'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'
-            ]
-        }
-    ];
-    
-    container.innerHTML = '';
-    sampleProperties.forEach(property => {
-        const card = createPropertyCard(property);
-        container.appendChild(card);
-    });
 }
