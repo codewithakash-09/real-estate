@@ -87,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
 // Load and display properties
 async function loadProperties() {
     const propertyGrid = document.getElementById('propertyGrid');
@@ -97,20 +96,35 @@ async function loadProperties() {
     
     try {
         if (loadingSpinner) loadingSpinner.style.display = 'block';
+        
+        // ALWAYS fetch from API first
         const properties = await fetchProperties();
         
-        if (properties.length === 0) {
-            displaySampleProperties(propertyGrid);
-        } else {
+        if (properties && properties.length > 0) {
             displayProperties(properties, propertyGrid);
+        } else {
+            // Only show samples if API returns empty AND we're not connected
+            console.log('No properties from API, showing message');
+            propertyGrid.innerHTML = `
+                <div style="text-align: center; padding: 3rem; grid-column: 1/-1;">
+                    <p>No properties available yet. Check back soon!</p>
+                    <a href="tel:9899130707" class="btn btn-primary">Contact Us for Properties</a>
+                </div>
+            `;
         }
     } catch (error) {
         console.error('Error loading properties:', error);
-        displaySampleProperties(propertyGrid);
+        propertyGrid.innerHTML = `
+            <div style="text-align: center; padding: 3rem; grid-column: 1/-1;">
+                <p>Unable to load properties. Please contact us directly.</p>
+                <a href="tel:9899130707" class="btn btn-primary">Call Now</a>
+            </div>
+        `;
     } finally {
         if (loadingSpinner) loadingSpinner.style.display = 'none';
     }
 }
+
 
 function displayProperties(properties, container) {
     container.innerHTML = '';
