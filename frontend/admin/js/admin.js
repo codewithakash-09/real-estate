@@ -198,7 +198,43 @@ function showSection(section) {
         event.target.classList.add('active');
     }
 }
-
+// Reset all data function
+async function resetAllData() {
+    if (!confirm('⚠️ WARNING: This will delete ALL properties and leads! This action cannot be undone. Are you sure?')) {
+        return;
+    }
+    
+    if (!confirm('Type "DELETE" to confirm:') || prompt('Type DELETE to confirm:') !== 'DELETE') {
+        alert('Reset cancelled');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/reset-data`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (response.ok) {
+            alert('✅ All data has been reset successfully!');
+            // Reload properties
+            loadProperties();
+            // Reload leads if visible
+            if (document.getElementById('leadsSection').style.display !== 'none') {
+                loadLeads();
+            }
+        } else {
+            const error = await response.json();
+            alert('Failed to reset data: ' + error.message);
+        }
+    } catch (error) {
+        console.error('Error resetting data:', error);
+        alert('Error resetting data. Please try again.');
+    }
+}
 function logout() {
     localStorage.removeItem('authToken');
     authToken = null;
