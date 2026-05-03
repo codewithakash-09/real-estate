@@ -45,10 +45,13 @@
             <main class="main-content">
                 <!-- Properties Section -->
                 <div id="propertiesSection" class="content-section">
-                    <div class="section-header">
-                        <h2>Property Listings</h2>
-                        <button class="btn btn-primary" onclick="showSection('addProperty')">+ Add New Property</button>
-                    </div>
+                   <div class="section-header">
+    <h2>Property Listings</h2>
+    <div style="display: flex; gap: 10px;">
+        <button class="btn btn-danger" onclick="resetAllData()" style="background: #dc3545;">🗑️ Reset All Data</button>
+        <button class="btn btn-primary" onclick="showSection('addProperty')">+ Add New Property</button>
+    </div>
+</div>
                     <div class="table-container">
                         <table>
                             <thead>
