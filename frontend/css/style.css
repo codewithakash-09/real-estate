@@ -897,7 +897,7 @@ body {
     font-size: 14px;
 }
 
-/* === LOANS SECTION - BLUE THEME === */
+/* === LOANS SECTION - MODERN BANK CARDS (CLEAN VERSION) === */
 .loans {
     padding: 5rem 0;
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -942,33 +942,93 @@ body {
     border-color: #4da6ff;
     box-shadow: 0 0 25px rgba(77, 166, 255, 0.5);
 }
+
+/* Bank icon - circular glass background (NO WHITE BOX) */
 .bank-icon {
     font-size: 3.5rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
     text-align: center;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-    background: rgba(255, 255, 255, 0.15);
-    width: 80px;
-    height: 80px;
+    background: rgba(255, 255, 255, 0.12);
+    width: 85px;
+    height: 85px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     margin-left: auto;
     margin-right: auto;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(6px);
     transition: all 0.3s;
 }
+
 .bank-card:hover .bank-icon {
     transform: scale(1.1);
     background: rgba(255, 255, 255, 0.25);
 }
-.bank-card:active {
-    transform: scale(0.98) rotate(-1deg);
-    box-shadow: 0 0 26px rgba(102, 189, 255, 0.95), 0 0 48px rgba(77, 166, 255, 0.65), 0 0 80px rgba(0, 122, 204, 0.35);
-    background: rgba(77, 166, 255, 0.12);
-    transition: all 0.1s ease;
+
+.bank-card h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    letter-spacing: -0.3px;
 }
+
+.bank-card:hover h3 {
+    color: #4da6ff;
+}
+
+.bank-card > p {
+    color: #e6a434;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.45);
+    display: inline-block;
+    padding: 6px 18px;
+    border-radius: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    width: fit-content;
+    letter-spacing: 0.3px;
+}
+
+.bank-card ul {
+    list-style: none;
+    margin-top: 0.5rem;
+    text-align: left;
+}
+
+.bank-card ul li {
+    padding: 0.55rem 0;
+    font-size: 0.9rem;
+    padding-left: 1.8rem;
+    position: relative;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.bank-card ul li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #e6a434;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.bank-card:hover ul li {
+    transform: translateX(3px);
+}
+
+.bank-card:hover ul li:before {
+    color: #4da6ff;
+}
+
 /* Bank background images */
 .bank-card[data-bank="hdfc"] {
     background-image: url('https://images.unsplash.com/photo-1560520031-3a4dc4e9fde0?q=80&w=1974&auto=format');
@@ -983,7 +1043,7 @@ body {
     background-image: url('https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=2070&auto=format');
 }
 
-
+/* Shine effect on hover */
 .bank-card::after {
     content: '';
     position: absolute;
@@ -991,12 +1051,12 @@ body {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.15) 50%, transparent 70%);
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
     transform: rotate(45deg);
     transition: all 0.6s ease;
     opacity: 0;
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
 }
 
 .bank-card:hover::after {
@@ -1004,11 +1064,7 @@ body {
     transform: rotate(45deg) translate(50%, 50%);
 }
 
-.bank-card.animate-in {
-    animation: cardPopIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-/* Animation for bank cards */
+/* Card entrance animation */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -1031,127 +1087,7 @@ body {
 .bank-card:nth-child(3) { animation-delay: 0.19s; }
 .bank-card:nth-child(4) { animation-delay: 0.26s; }
 
-.bank-logo-container {
-    width: 120px;
-    height: 80px;
-    margin: 0 auto 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 12px;
-    padding: 15px;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(2px);
-}
-
-.bank-card:hover .bank-logo-container {
-    transform: scale(1.05);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.bank-logo-img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    filter: brightness(1) contrast(1);
-    transition: filter 0.3s ease;
-}
-
-.bank-card:hover .bank-logo-img {
-    filter: brightness(1.05) contrast(1.05);
-}
-
-.bank-logo-fallback {
-    display: none;
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: var(--primary);
-    letter-spacing: 2px;
-    align-items: center;
-    justify-content: center;
-}
-
-.bank-card[data-bank="hdfc"] .bank-logo-fallback { color: #004B8D; }
-.bank-card[data-bank="icici"] .bank-logo-fallback { color: #F15A29; }
-.bank-card[data-bank="sbi"] .bank-logo-fallback { color: #2E6A9E; }
-.bank-card[data-bank="piramal"] .bank-logo-fallback { color: #003d4d; }
-.bank-card[data-bank="indian"] .bank-logo-fallback { color: #1E5F47; }
-.bank-card[data-bank="bob"] .bank-logo-fallback { color: #1F2A5E; }
-
-.bank-card h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    text-align: center;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    letter-spacing: -0.3px;
-}
-
-.bank-card:hover h3 {
-    color: #4da6ff;
-}
-
-.bank-card > p {
-    color: #e6a434;
-    font-weight: 700;
-    font-size: 0.95rem;
-    margin-bottom: 1.2rem;
-    text-align: center;
-    background: rgba(0, 0, 0, 0.4);
-    display: inline-block;
-    padding: 5px 16px;
-    border-radius: 30px;
-    margin-left: auto;
-    margin-right: auto;
-    width: fit-content;
-}
-
-.bank-card ul {
-    list-style: none;
-    margin-top: 1.2rem;
-    text-align: left;
-}
-.bank-card ul li {
-    padding: 0.5rem 0;
-    font-size: 0.9rem;
-    padding-left: 1.8rem;
-    position: relative;
-    color: rgba(255, 255, 255, 0.95);
-    font-weight: 500;
-}
-.bank-card ul li:before {
-    content: "✓";
-    position: absolute;
-    left: 0;
-    color: #e6a434;
-    font-weight: bold;
-    font-size: 1rem;
-}
-
-.bank-card:hover ul li {
-    transform: translateX(3px);
-    color: #ffffff;
-}
-
-.bank-card:hover ul li:before {
-    color: #4da6ff;
-    transform: scale(1.1);
-}
-.bank-card > p,
-.bank-card ul,
-.bank-card ul li {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-
-.bank-card[data-bank="hdfc"]:hover { border-bottom: 3px solid #004B8D; }
-.bank-card[data-bank="icici"]:hover { border-bottom: 3px solid #F15A29; }
-.bank-card[data-bank="sbi"]:hover { border-bottom: 3px solid #2E6A9E; }
-.bank-card[data-bank="piramal"]:hover { border-bottom: 3px solid #003d4d; }
-.bank-card[data-bank="indian"]:hover { border-bottom: 3px solid #1E5F47; }
-.bank-card[data-bank="bob"]:hover { border-bottom: 3px solid #1F2A5E; }
-
+/* Loan CTA section */
 .loan-cta {
     text-align: center;
     margin-top: 4rem;
@@ -1163,6 +1099,7 @@ body {
     position: relative;
     overflow: hidden;
 }
+
 .loan-cta::before {
     content: '';
     position: absolute;
@@ -1170,7 +1107,7 @@ body {
     right: -50%;
     width: 200px;
     height: 200px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
     animation: floatBubble 6s ease-in-out infinite;
 }
@@ -1182,7 +1119,7 @@ body {
     left: -50%;
     width: 150px;
     height: 150px;
-    background: rgba(255,255,255,0.08);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 50%;
     animation: floatBubble 8s ease-in-out infinite reverse;
 }
@@ -1199,19 +1136,24 @@ body {
     position: relative;
     z-index: 1;
 }
+
 .loan-cta .btn-primary {
     background: white;
     color: #003d4d;
     padding: 14px 40px;
     font-size: 1.1rem;
     border-radius: 50px;
+    transition: all 0.3s ease;
 }
 
 .loan-cta .btn-primary:hover {
     background: #e6a434;
     color: #1a1a1a;
     transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
+
+/* Responsive */
 @media (max-width: 768px) {
     .bank-card {
         padding: 24px 20px;
@@ -1226,7 +1168,7 @@ body {
     }
     .bank-card ul li {
         font-size: 0.85rem;
-        padding: 0.4rem 0 0.4rem 1.6rem;
+        padding: 0.45rem 0 0.45rem 1.6rem;
     }
     .loan-cta {
         padding: 2rem;
