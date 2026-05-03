@@ -19,7 +19,124 @@ const app = express();
 
 // ============= MONGODB CONNECTION =============
 connectDB();
-
+// ============= ONE-TIME DATA RESET (via Environment Variable) =============
+// Set RESET_DB=true in Render environment variables, deploy once, then remove it
+if (process.env.RESET_DB === 'true') {
+    console.log('🔄 RESET_DB flag detected - Resetting MongoDB data...');
+    
+    // Use async IIFE to reset data
+    (async () => {
+        try {
+            // Wait for MongoDB connection
+            if (mongoose.connection.readyState !== 1) {
+                console.log('⏳ Waiting for MongoDB connection...');
+                await new Promise(resolve => setTimeout(resolve, 3000));
+            }
+            
+            // Delete all properties
+            const deletedProps = await Property.deleteMany({});
+            console.log(`🗑️ Deleted ${deletedProps.deletedCount} properties`);
+            
+            // Delete all leads
+            const deletedLeads = await Lead.deleteMany({});
+            console.log(`🗑️ Deleted ${deletedLeads.deletedCount} leads`);
+            
+            // Insert default properties
+            const defaultProperties = [
+                {
+                    title: '2BHK GDA Flat in Vaishali',
+                    price: 3500000,
+                    location: 'Ghaziabad',
+                    type: 'GDA Flat',
+                    bedrooms: 2,
+                    bathrooms: 2,
+                    area: 850,
+                    description: 'Beautiful GDA flat in prime location of Vaishali, near metro station',
+                    status: 'Available',
+                    images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'],
+                    mainImage: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
+                    createdAt: new Date()
+                },
+                {
+                    title: '3BHK Builder Apartment Indirapuram',
+                    price: 7500000,
+                    location: 'Ghaziabad',
+                    type: 'Builder Flat',
+                    bedrooms: 3,
+                    bathrooms: 3,
+                    area: 1450,
+                    description: 'Luxurious builder apartment in Indirapuram with modern amenities',
+                    status: 'Available',
+                    images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'],
+                    mainImage: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
+                    createdAt: new Date()
+                },
+                {
+                    title: '2BHK GDA Flat Raj Nagar Extension',
+                    price: 2200000,
+                    location: 'Ghaziabad',
+                    type: 'GDA Flat',
+                    bedrooms: 2,
+                    bathrooms: 2,
+                    area: 950,
+                    description: 'Spacious GDA flat in Raj Nagar Extension with park view',
+                    status: 'Available',
+                    images: ['https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500'],
+                    mainImage: 'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500',
+                    createdAt: new Date()
+                },
+                {
+                    title: '1BHK Builder Floor in Dadri',
+                    price: 1800000,
+                    location: 'Dadri',
+                    type: 'Builder Flat',
+                    bedrooms: 1,
+                    bathrooms: 1,
+                    area: 550,
+                    description: 'Affordable builder floor near Greater Noida West',
+                    status: 'Available',
+                    images: ['https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=500'],
+                    mainImage: 'https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=500',
+                    createdAt: new Date()
+                },
+                {
+                    title: '3BHK Independent House Loni',
+                    price: 4800000,
+                    location: 'Loni',
+                    type: 'Builder Flat',
+                    bedrooms: 3,
+                    bathrooms: 3,
+                    area: 1600,
+                    description: 'Independent house with terrace and parking in Loni',
+                    status: 'Available',
+                    images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'],
+                    mainImage: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
+                    createdAt: new Date()
+                },
+                {
+                    title: '2BHK GDA Flat Hapur',
+                    price: 1650000,
+                    location: 'Hapur',
+                    type: 'GDA Flat',
+                    bedrooms: 2,
+                    bathrooms: 2,
+                    area: 780,
+                    description: 'Budget-friendly GDA flat on NH-24, Hapur',
+                    status: 'Available',
+                    images: ['https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500'],
+                    mainImage: 'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500',
+                    createdAt: new Date()
+                }
+            ];
+            
+            const inserted = await Property.insertMany(defaultProperties);
+            console.log(`✅ Added ${inserted.length} default properties to MongoDB`);
+            console.log('✅ Data reset complete!');
+        } catch (error) {
+            console.error('❌ Error during reset:', error);
+        }
+    })();
+}
 // Security Middleware
 app.use(helmet({
     contentSecurityPolicy: false,
@@ -233,6 +350,122 @@ app.post('/api/auth/login', async (req, res) => {
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ message: 'Server error' });
+    }
+});
+// ============= RESET DATA ROUTE (FOR MONGODB) =============
+app.post('/api/admin/reset-data', authMiddleware, async (req, res) => {
+    try {
+        console.log('🔄 Reset data request received');
+        
+        // Delete all properties
+        const deletedProperties = await Property.deleteMany({});
+        console.log(`🗑️ Deleted ${deletedProperties.deletedCount} properties`);
+        
+        // Delete all leads
+        const deletedLeads = await Lead.deleteMany({});
+        console.log(`🗑️ Deleted ${deletedLeads.deletedCount} leads`);
+        
+        // Insert default sample properties
+        const defaultProperties = [
+            {
+                title: '2BHK GDA Flat in Vaishali',
+                price: 3500000,
+                location: 'Ghaziabad',
+                type: 'GDA Flat',
+                bedrooms: 2,
+                bathrooms: 2,
+                area: 850,
+                description: 'Beautiful GDA flat in prime location of Vaishali, near metro station. Well-maintained property with park view.',
+                status: 'Available',
+                images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'],
+                mainImage: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
+                createdAt: new Date()
+            },
+            {
+                title: '3BHK Builder Apartment Indirapuram',
+                price: 7500000,
+                location: 'Ghaziabad',
+                type: 'Builder Flat',
+                bedrooms: 3,
+                bathrooms: 3,
+                area: 1450,
+                description: 'Luxurious builder apartment in Indirapuram with modern amenities. Close to metro and shopping malls.',
+                status: 'Available',
+                images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'],
+                mainImage: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
+                createdAt: new Date()
+            },
+            {
+                title: '2BHK GDA Flat Raj Nagar Extension',
+                price: 2200000,
+                location: 'Ghaziabad',
+                type: 'GDA Flat',
+                bedrooms: 2,
+                bathrooms: 2,
+                area: 950,
+                description: 'Spacious GDA flat in Raj Nagar Extension with park view. Excellent ventilation and natural light.',
+                status: 'Available',
+                images: ['https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500'],
+                mainImage: 'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500',
+                createdAt: new Date()
+            },
+            {
+                title: '1BHK Builder Floor in Dadri',
+                price: 1800000,
+                location: 'Dadri',
+                type: 'Builder Flat',
+                bedrooms: 1,
+                bathrooms: 1,
+                area: 550,
+                description: 'Affordable builder floor near Greater Noida West. Great for first-time home buyers.',
+                status: 'Available',
+                images: ['https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=500'],
+                mainImage: 'https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=500',
+                createdAt: new Date()
+            },
+            {
+                title: '3BHK Independent House Loni',
+                price: 4800000,
+                location: 'Loni',
+                type: 'Builder Flat',
+                bedrooms: 3,
+                bathrooms: 3,
+                area: 1600,
+                description: 'Independent house with terrace and parking in Loni. Peaceful locality with good connectivity.',
+                status: 'Available',
+                images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'],
+                mainImage: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500',
+                createdAt: new Date()
+            },
+            {
+                title: '2BHK GDA Flat Hapur',
+                price: 1650000,
+                location: 'Hapur',
+                type: 'GDA Flat',
+                bedrooms: 2,
+                bathrooms: 2,
+                area: 780,
+                description: 'Budget-friendly GDA flat on NH-24, Hapur. High appreciation potential.',
+                status: 'Available',
+                images: ['https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500'],
+                mainImage: 'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=500',
+                createdAt: new Date()
+            }
+        ];
+        
+        const inserted = await Property.insertMany(defaultProperties);
+        console.log(`✅ Added ${inserted.length} default properties to MongoDB`);
+        
+        res.json({ 
+            message: 'Data reset successfully!', 
+            deletedProperties: deletedProperties.deletedCount,
+            deletedLeads: deletedLeads.deletedCount,
+            addedProperties: inserted.length
+        });
+        
+    } catch (error) {
+        console.error('❌ Error resetting data:', error);
+        res.status(500).json({ message: error.message });
     }
 });
 
