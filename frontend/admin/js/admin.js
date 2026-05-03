@@ -446,18 +446,32 @@ document.getElementById('propertyForm')?.addEventListener('submit', async (e) =>
     // Remove duplicates
     allImages = [...new Set(allImages)];
     
-    // Process uploaded files if any (optional)
+   // Process uploaded files via ImgBB
     if (imageFiles && imageFiles.length > 0) {
-        submitBtn.textContent = 'Uploading images...';
+        submitBtn.textContent = 'Uploading images to ImgBB...';
+        submitBtn.disabled = true; // Prevent double clicks
+        
         for (let i = 0; i < imageFiles.length; i++) {
             const file = imageFiles[i];
             if (file.size > 5 * 1024 * 1024) {
                 alert(`${file.name} is too large. Max 5MB.`);
                 continue;
             }
-            // For now, just add as local URL (you can implement ImgBB upload later)
-            const localUrl = URL.createObjectURL(file);
-            allImages.push(localUrl);
+            
+            try {
+                // Call the existing ImgBB upload function
+                const uploadResult = await uploadToImgBB(file);
+                
+                if (uploadResult.success) {
+                    allImages.push(uploadResult.url);
+                    console.log(`Successfully uploaded image ${i + 1} to ImgBB`);
+                } else {
+                    alert(`Failed to upload ${file.name}: ${uploadResult.error}`);
+                }
+            } catch (err) {
+                console.error("ImgBB upload failed:", err);
+                alert(`Error uploading ${file.name}. Please try again.`);
+            }
         }
     }
     
