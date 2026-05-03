@@ -39,7 +39,7 @@ app.use('/api/', limiter);
 // CORS configuration
 const corsOptions = {
     origin: process.env.NODE_ENV === 'production' 
-        ? ['https://yourdomain.com', 'https://www.yourdomain.com']
+        ? ['https://real-estate-z4dr.onrender.com']
         : ['http://localhost:3000', 'http://localhost:5000', 'http://127.0.0.1:5500', 'http://localhost:5500'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -213,22 +213,19 @@ app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         
-        if (!ADMIN_USERNAME || !ADMIN_PASSWORD_HASH) {
-            return res.status(500).json({ message: 'Server configuration error' });
+        // Check for plain text password in ENV
+        if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD || !process.env.JWT_SECRET) {
+            return res.status(500).json({ message: 'Server configuration error: Missing Environment Variables' });
         }
         
-        if (username !== ADMIN_USERNAME) {
-            return res.status(401).json({ message: 'Invalid username or password' });
-        }
-        
-        const isMatch = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
-        if (!isMatch) {
+        // Compare directly with the ENV variable
+        if (username !== process.env.ADMIN_USERNAME || password !== process.env.ADMIN_PASSWORD) {
             return res.status(401).json({ message: 'Invalid username or password' });
         }
         
         const token = jwt.sign(
-            { username: ADMIN_USERNAME, role: 'admin' },
-            process.env.JWT_SECRET || 'fallbackSecret',
+            { username: process.env.ADMIN_USERNAME, role: 'admin' },
+            process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
         
