@@ -1,9 +1,6 @@
 // API Configuration
 const API_BASE_URL = window.location.origin + '/api';
 let authToken = localStorage.getItem('authToken');
-// API Configuration
-const API_BASE_URL = window.location.origin + '/api';
-let authToken = localStorage.getItem('authToken');
 
 // Fetch all properties with filters
 async function fetchProperties(filters = {}) {
