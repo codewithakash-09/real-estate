@@ -1031,7 +1031,7 @@ body {
 
 /* Bank background images */
 .bank-card[data-bank="hdfc"] {
-    background-image: url('https://images.unsplash.com/photo-1560520031-3a4dc4e9fde0?q=80&w=1974&auto=format');
+    background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format');
 }
 .bank-card[data-bank="icici"] {
     background-image: url('https://images.unsplash.com/photo-1601597111158-2fceff292cdc?q=80&w=2070&auto=format');
