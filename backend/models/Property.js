@@ -1,55 +1,30 @@
 const mongoose = require('mongoose');
 
 const propertySchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true
+    title: { type: String, required: true },
+    price: { type: Number, required: true },
+    location: { 
+        type: String, 
+        required: true, 
+        enum: ['Ghaziabad', 'Dadri', 'Loni', 'Hapur', 'Delhi'] 
     },
-    price: {
-        type: Number,
-        required: true
+    type: { 
+        type: String, 
+        required: true, 
+        enum: ['GDA Flat', 'Builder Flat'] 
     },
-    location: {
-        type: String,
-        required: true,
-        enum: ['Ghaziabad', 'Dadri', 'Loni', 'Hapur', 'Delhi']
+    description: { type: String, required: true },
+    bedrooms: { type: Number, required: true },
+    bathrooms: { type: Number, required: true },
+    area: { type: Number, required: true },
+    images: { type: [String], default: [] },
+    mainImage: { type: String, default: '' },
+    status: { 
+        type: String, 
+        enum: ['Available', 'Sold', 'Under Process'], 
+        default: 'Available' 
     },
-    type: {
-        type: String,
-        required: true,
-        enum: ['GDA Flat', 'Builder Flat']
-    },
-    description: {
-        type: String,
-        required: true
-    },
-    bedrooms: {
-        type: Number,
-        required: true
-    },
-    bathrooms: {
-        type: Number,
-        required: true
-    },
-    area: {
-        type: Number,
-        required: true
-    },
-    image: {
-        type: String,
-        default: '/uploads/default-property.jpg'
-    },
-    additionalImages: [String],
-    features: [String],
-    status: {
-        type: String,
-        enum: ['Available', 'Sold', 'Under Process'],
-        default: 'Available'
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+    createdAt: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('Property', propertySchema);
